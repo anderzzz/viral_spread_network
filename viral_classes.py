@@ -1,6 +1,7 @@
 '''Simulation of people in the world infection and spread
 
 '''
+import pandas as pd
 import networkx as nx
 from numpy import random as rnd
 from scipy.stats import norm
@@ -15,6 +16,7 @@ class _State():
     def reveal(self):
 
         self.symptomatic = True
+        self.days_since_symptomatic = 0
 
     def activate(self):
 
@@ -23,31 +25,51 @@ class _State():
     def succumb(self):
 
         self.dead = True
-        self.days_since_start = self.days_since_infection
+        self.days_infected_until_dead = self.days_since_infection
 
     def survive(self):
 
         self.infected = False
         self.symptomatic = False
         self.contagious = False
-        self.days_since_start = self.days_since_infection
+        self.quarantined = False
+        self.days_infected_until_survive = self.days_since_infection
 
     def immunize(self):
 
         self.immune = True
 
+    def quarantine(self):
+
+        self.quarantined = True
+        self.days_since_quarantined = 0
+
+    def report(self):
+        return pd.Series(data=[self.infected, self.contagious, self.symptomatic,
+                               self.immune, self.dead, self.quarantined,
+                               self.days_alive, self.days_since_infection,
+                               self.days_since_symptomatic],
+                         index=['infected', 'contagious', 'symptomatic',
+                                'immune', 'dead', 'quarantined',
+                                'days_alive', 'days_since_infection',
+                                'days_since_symptomatic'])
+
     def __init__(self, infected=False, contagious=False, symptomatic=False,
-                       immune=False, dead=False, days_since_infection=None,
-                       days_alive = 0):
+                 immune=False, dead=False, quarantined=False):
 
         self.infected = infected
         self.contagious = contagious
         self.symptomatic = symptomatic
         self.immune = immune
         self.dead = dead
+        self.quarantined = quarantined
 
-        self.days_since_infection = days_since_infection
-        self.days_alive = days_alive
+        self.days_since_infection = None
+        self.days_since_symptomatic = None
+        self.days_infected_until_dead = None
+        self.days_infected_until_survive = None
+        self.days_since_quarantined = None
+        self.days_alive = 0
 
 class Person():
     '''Person with a state and a predisposition
@@ -65,13 +87,33 @@ class Person():
     def is_dead(self):
         return self.state.dead
 
+    def is_symptomatic(self):
+        return self.state.symptomatic
+
+    def is_quarantined(self):
+        return self.state.quarantined
+
+    def days_infected(self):
+        return self.state.days_since_infection
+
     def grow_older(self):
 
         self.state.days_alive += 1
         if self.state.infected:
             self.state.days_since_infection += 1
+        if self.state.symptomatic:
+            self.state.days_since_symptomatic += 1
+        if self.state.quarantined:
+            self.state.days_since_quarantined += 1
 
-    def __init__(self, name, caution_interaction=0.0, general_health=1.0):
+    def report(self):
+
+        series_person = pd.Series(data=[self.name, self.caution_interaction, self.general_health],
+                                  index=['name', 'caution_interaction', 'general_health'])
+        series_state = self.state.report()
+        return series_person.append(series_state)
+
+    def __init__(self, name, caution_interaction=0.0, general_health=0.0):
 
         self.name = name
 
@@ -85,24 +127,91 @@ class Person():
         self.reveal = self.state.reveal
         self.survive = self.state.survive
         self.immunize = self.state.immunize
+        self.quarantine = self.state.quarantine
 
 class World():
 
     def do_they_meet_today(self, p_a, p_b):
 
-        try:
-            intensity_social_edge = self.network[p_a][p_b]['weight']
-            they_meet = rnd.ranf() < intensity_social_edge
-
-        except KeyError:
+        if p_a.is_quarantined() or p_b.is_quarantined():
             they_meet = False
+
+        else:
+            try:
+                intensity_social_edge = self.network[p_a][p_b]['weight']
+                they_meet = rnd.ranf() < intensity_social_edge
+
+            except KeyError:
+                they_meet = False
 
         return they_meet
 
-    def __init__(self, name, persons_network):
+    def enact_quarantine_policy(self):
+
+        self._q_policy(**self._q_policy_kwargs)
+
+    def _q_policy_none(self):
+
+        pass
+
+    def _q_policy_symptomatic(self):
+
+        for person in self.network.nodes:
+            if person.is_symptomatic():
+                person.quarantine()
+
+    def _q_policy_symptomatic_with_chance(self, chance):
+
+        for person in self.network.nodes:
+            if person.is_symptomatic():
+                if rnd.ranf() < chance:
+                    person.quarantine()
+
+    def report(self):
+
+        total_df_data = []
+        for person in self.network.nodes:
+
+            weight_sum = sum([self.network.edges[ee]['weight'] for ee in self.network.edges(person)])
+
+            person_in_world_series = pd.Series(data=[self.network.degree[person],
+                                                     weight_sum],
+                                               index=['degree',
+                                                      'expectation_meetings_per_day'])
+
+            person_series = person.report()
+            person_series = person_series.append(person_in_world_series)
+            total_df_data.append(person_series)
+
+        total_df = pd.DataFrame(total_df_data)
+        total_df = total_df.set_index(['name', 'days_alive'])
+        total_df = total_df.stack()
+        new_index = total_df.index.set_names(['name','days_alive','property'])
+        total_df.index = new_index
+
+        return total_df
+
+    def __init__(self, name, persons_network,
+                 quarantine_policy=None, quarantine_policy_kwargs={}):
 
         self.name = name
         self.network = persons_network
+
+        self._q_policy_kwargs = quarantine_policy_kwargs
+        if quarantine_policy is None:
+            self._q_policy = self._q_policy_none
+
+        elif quarantine_policy == 'symptomatic':
+            self._q_policy = self._q_policy_symptomatic
+
+        elif quarantine_policy == 'symptomatic with delay':
+            self._q_policy = self._q_policy_symptomatic_with_chance
+
+        elif callable(quarantine_policy):
+            self._q_policy = quarantine_policy
+
+        else:
+            raise ValueError('Unknown quarantine policy: {}'.format(quarantine_policy))
 
 class Disease():
 
@@ -123,8 +232,9 @@ class Disease():
             self._progression_node(person)
             if person.is_dead():
                 persons_dead.append(person)
-
         world.network.remove_nodes_from(persons_dead)
+
+        world.enact_quarantine_policy()
 
         self.day_counter += 1
 
@@ -172,13 +282,13 @@ class Disease():
                 survive_mean_actual = self.survive_mean - person.general_health * \
                                       (self.succumb_mean + self.succumb_spread - self.survive_mean)
 
-            survived = self._trial(person.survive, person.days_since_infection, norm.cdf,
+            survived = self._trial(person.survive, person.days_infected(), norm.cdf,
                                    {'loc' : survive_mean_actual,
                                     'scale' : self.survive_spread})
 
             # If no survival today, do trial if they succumb
             if not survived:
-                self._trial(person.succumb, person.days_since_infection, norm.cdf,
+                self._trial(person.succumb, person.days_infected(), norm.cdf,
                             {'loc' : self.succumb_mean,
                              'scale' : self.succumb_spread})
 
@@ -188,11 +298,11 @@ class Disease():
 
         # If instead person is infected, not yet symptomatic, they can become activated and/or become symptomatic
         elif person.is_infected():
-            self._trial(person.activate, person.days_since_infection, norm.cdf,
+            self._trial(person.activate, person.days_infected(), norm.cdf,
                         {'loc' : self.activate_mean,
                          'scale' : self.activate_spread})
 
-            self._trial(person.reveal, person.days_since_infection, norm.cdf,
+            self._trial(person.reveal, person.days_infected(), norm.cdf,
                         {'loc' : self.reveal_mean,
                          'scale' : self.reveal_spread})
 
@@ -223,18 +333,35 @@ class Disease():
 # Simple test
 #
 pp1 = Person('Arnold')
+pp1.infect()
 pp2 = Person('Lars')
 pp3 = Person('Sven')
+pp4 = Person('Per')
 
 gg = nx.Graph()
 gg.add_node(pp1)
 gg.add_node(pp2)
 gg.add_node(pp3)
+gg.add_node(pp4)
 gg.add_edge(pp1, pp2, weight=0.5)
 gg.add_edge(pp2, pp3, weight=0.5)
+gg.add_edge(pp1, pp4, weight=0.1)
 
-the_world = World('simple test', gg)
+the_world = World('simple test', gg, quarantine_policy='symptomatic')
 
-viral_disease = Disease('contact disease')
+viral_disease = Disease('contact disease',
+                        transmission_base_prob=0.5,
+                        activate_mean=4, activate_spread=0.1,
+                        reveal_mean=11, reveal_spread=1,
+                        survive_mean=24, survive_spread=2,
+                        succumb_mean=26, succumb_spread=2,
+                        immunization_prob=0.75)
 
-viral_disease.one_more_day(the_world)
+sim_data = []
+for k_day in range(30):
+    viral_disease.progress_one_more_day(the_world)
+    sim_data.append(the_world.report())
+
+df = pd.concat(sim_data)
+
+print (df[:,:,'expectation_meetings_per_day'])
