@@ -167,6 +167,9 @@ class World():
                 if rnd.ranf() < chance:
                     person.quarantine()
 
+    def is_disease_free(self):
+        return not any([person.is_infected() for person in self.network.nodes])
+
     def report(self):
 
         total_df_data = []
