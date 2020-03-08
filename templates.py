@@ -4,6 +4,28 @@ from numpy import random as rnd
 
 from viral_classes import Person, World, Disease
 
+# Disease constants
+DISEASES = {}
+DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.05,
+                          'activate_mean' : 4.0,
+                          'activate_spread' : 2.0,
+                          'reveal_mean' : 8.0,
+                          'reveal_spread' : 2.0,
+                          'survive_mean' : 20.0,
+                          'survive_spread' : 3.0,
+                          'succumb_mean' : 22.0,
+                          'succumb_spread' : 3.0,
+                          'immunization_prob' : 1.00}
+
+# World constants
+WORLDS = {}
+WORLDS['World W_01'] = {'quarantine_policy' : 'revealed',
+                        'persons_network_func' : 'population_well_mixed',
+                        'persons_network_kwargs' : {'n_people' : 500,
+                                                    'n_infect_init' : 1,
+                                                    'n_avg_meet' : 10}}
+
+# Social network creation methods
 def population_well_mixed(n_people, n_infect_init, n_avg_meet):
 
     # Generate people in population and seed with a few infected ones
@@ -20,28 +42,41 @@ def population_well_mixed(n_people, n_infect_init, n_avg_meet):
     f_weight = float(n_avg_meet) / float(n_people)
     nx.set_edge_attributes(gg, f_weight, 'weight')
 
-    print (gg)
-
     return gg
 
-viral_disease_1 = Disease('viral X',
-                          transmission_base_prob=0.1,
-                          activate_mean=4, activate_spread=2,
-                          reveal_mean=8, reveal_spread=2,
-                          survive_mean=20, survive_spread=3,
-                          succumb_mean=22, succumb_spread=3,
-                          immunization_prob=1.00)
+def simulation(disease_name, world_name, n_days_max, report_interval, out_file_name):
 
-gg = population_well_mixed(5000, 1, 10)
-the_world = World('simple test', gg, quarantine_policy=None)
+    # Instantiate disease and world
+    viral_disease = Disease(name=disease_name, **DISEASES[disease_name])
+    social_graph = eval(WORLDS[world_name]['persons_network_func'])(**WORLDS[world_name]['persons_network_kwargs'])
+    the_world = World(name=world_name,
+                      persons_network=social_graph,
+                      quarantine_policy=WORLDS[world_name]['quarantine_policy'])
 
-sim_data = []
-for k_day in range(100):
-    print (k_day)
-    viral_disease_1.progress_one_more_day(the_world)
-    sim_data.append(the_world.report())
-    if the_world.is_disease_free():
-        break
+    # Output simulation metadata
+    with open(out_file_name + '_sim_data.csv', 'w') as f:
+        f.write('World Name, {}\n'.format(world_name))
+        f.write('Social Graph Method, {}\n'.format(WORLDS[world_name]['persons_network_func']))
+        for key, value in WORLDS[world_name]['persons_network_kwargs'].items():
+            f.write('{}, {}\n'.format(key, value))
+        f.write('Disease Name, {}\n'.format(disease_name))
+        for key, value in DISEASES[disease_name].items():
+            f.write('{}, {}\n'.format(key, value))
 
-df = pd.DataFrame(pd.concat(sim_data), columns=['value'])
-df.to_csv('dummy3.csv')
+    # Run the simulation
+    for k_day in range(n_days_max):
+
+        print ('Simulate Day: {}'.format(k_day))
+
+        viral_disease.progress_one_more_day(the_world)
+        if k_day % report_interval == 0:
+            df_report = the_world.report()
+            with open(out_file_name + '_data.csv', 'a') as f:
+                df_report.to_csv(f, mode='a', header=f.tell() == 0)
+
+        if the_world.is_disease_free():
+            break
+
+if __name__ == '__main__':
+
+    simulation('Virus X_01', 'World W_01', 100, 1, 'test_run')
