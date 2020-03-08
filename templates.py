@@ -6,7 +6,7 @@ from viral_classes import Person, World, Disease
 
 # Disease constants
 DISEASES = {}
-DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.05,
+DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.25,
                           'activate_mean' : 4.0,
                           'activate_spread' : 2.0,
                           'reveal_mean' : 8.0,
@@ -21,9 +21,9 @@ DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.05,
 WORLDS = {}
 WORLDS['World W_01'] = {'quarantine_policy' : 'revealed',
                         'persons_network_func' : 'population_well_mixed',
-                        'persons_network_kwargs' : {'n_people' : 500,
+                        'persons_network_kwargs' : {'n_people' : 5,
                                                     'n_infect_init' : 1,
-                                                    'n_avg_meet' : 10}}
+                                                    'n_avg_meet' : 2}}
 
 # Social network creation methods
 def population_well_mixed(n_people, n_infect_init, n_avg_meet):

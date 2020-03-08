@@ -100,7 +100,8 @@ class Person():
                                          'caution_interaction', 'general_health'])
         series_time = pd.Series(dict([('time_' + label, value) for label, value in self.time_stamp.items()]))
         series_state = self.state.report()
-        return series_person.append(series_state).append(series_time)
+
+        return pd.concat([series_person, series_state, series_time])
 
     def __init__(self, name, caution_interaction=0.0, general_health=0.0):
 
@@ -187,7 +188,6 @@ class World():
             person_series = person_series.append(person_in_world_series)
             total_df_data.append(person_series)
 
-        print (total_df_data)
         total_df = pd.DataFrame(total_df_data)
         total_df = total_df.set_index(['name', 'time_coordinate'])
         total_df = total_df.stack()
