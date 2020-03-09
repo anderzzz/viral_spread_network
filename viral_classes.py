@@ -21,18 +21,22 @@ class _State():
 
     def succumb(self):
         self.dead = True
+        self.reset()
 
     def recover(self):
-        self.infected = False
-        self.revealed = False
-        self.contagious = False
-        self.quarantined = False
+        self.reset()
 
     def immunize(self):
         self.immune = True
 
     def quarantine(self):
         self.quarantined = True
+
+    def reset(self):
+        self.infected = False
+        self.revealed = False
+        self.contagious = False
+        self.quarantined = False
 
     def report(self):
         '''Report current state'''
