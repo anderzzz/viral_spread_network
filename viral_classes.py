@@ -296,8 +296,20 @@ class Disease():
         '''Make disease progress as far as a given social graph node is concerned. Number of events possible as the
         single individual deals with the disease.'''
 
-        # If person is contagious, possible next transition: recover or succumb
-        if person.is_contagious():
+        # A dead person is in terminal state, no transitions to be made
+        if person.is_dead():
+            pass
+
+        # If person is contagious, possible next transition: reveal or recover or succumb
+        elif person.is_contagious():
+
+            # Attempt to reveal
+            if not person.is_revealed():
+                self._trial(person.reveal, person.days_infected(), norm.cdf,
+                            {'loc' : self.reveal_mean,
+                             'scale' : self.reveal_spread})
+
+            # Scale recovery parameter by general health of person
             if person.general_health >= 0.0:
                 recover_mean_actual = self.recover_mean + person.general_health * \
                                       (self.activate_mean - self.recover_mean)
@@ -339,15 +351,11 @@ class Disease():
             if first_outcome or second_outcome:
                 self._trial(person.immunize, None, lambda _ : self.immunization_prob)
 
-        # If instead person is infected, they can become activated and/or become revealed
+        # If instead person is infected but not contagious, attempt to activate disease
         elif person.is_infected():
             self._trial(person.activate, person.days_infected(), norm.cdf,
                         {'loc' : self.activate_mean,
                          'scale' : self.activate_spread})
-
-            self._trial(person.reveal, person.days_infected(), norm.cdf,
-                        {'loc' : self.reveal_mean,
-                         'scale' : self.reveal_spread})
 
         person.time_coordinate = self.day_counter
 
