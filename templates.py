@@ -11,8 +11,8 @@ DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.50,
                           'activate_spread' : 1.0,
                           'reveal_mean' : 8.0,
                           'reveal_spread' : 2.0,
-                          'survive_mean' : 20.0,
-                          'survive_spread' : 3.0,
+                          'recover_mean' : 20.0,
+                          'recover_spread' : 3.0,
                           'succumb_mean' : 122.0,
                           'succumb_spread' : 3.0,
                           'immunization_prob' : 0.00}
@@ -20,10 +20,10 @@ DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.50,
 # World constants
 WORLDS = {}
 WORLDS['World W_01'] = {'quarantine_policy' : None,
-                        'persons_network_func' : 'population_well_mixed',
-                        'persons_network_kwargs' : {'n_people' : 2000,
-                                                    'n_infect_init' : 1,
-                                                    'n_avg_meet' : 50}}
+                        'social_graph_func' : 'population_well_mixed',
+                        'social_graph_kwargs' : {'n_people' : 2000,
+                                                 'n_infect_init' : 1,
+                                                 'n_avg_meet' : 50}}
 
 # Social network creation methods
 def population_well_mixed(n_people, n_infect_init, n_avg_meet):
@@ -48,16 +48,16 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
 
     # Instantiate disease and world
     viral_disease = Disease(name=disease_name, **DISEASES[disease_name])
-    social_graph = eval(WORLDS[world_name]['persons_network_func'])(**WORLDS[world_name]['persons_network_kwargs'])
+    social_graph = eval(WORLDS[world_name]['social_graph_func'])(**WORLDS[world_name]['social_graph_kwargs'])
     the_world = World(name=world_name,
-                      persons_network=social_graph,
+                      social_graph=social_graph,
                       quarantine_policy=WORLDS[world_name]['quarantine_policy'])
 
     # Output simulation metadata
     with open(out_file_name + '_sim_data.csv', 'w') as f:
         f.write('World Name, {}\n'.format(world_name))
-        f.write('Social Graph Method, {}\n'.format(WORLDS[world_name]['persons_network_func']))
-        for key, value in WORLDS[world_name]['persons_network_kwargs'].items():
+        f.write('Social Graph Method, {}\n'.format(WORLDS[world_name]['social_graph_func']))
+        for key, value in WORLDS[world_name]['social_graph_kwargs'].items():
             f.write('{}, {}\n'.format(key, value))
         f.write('Disease Name, {}\n'.format(disease_name))
         for key, value in DISEASES[disease_name].items():

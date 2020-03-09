@@ -284,6 +284,7 @@ class Disease():
         '''Make disease progress as far as given social graph edge is concerned. Only event is transmission, which requires
         one contagious individual and one uninfected individual.'''
 
+        outcome = False
         if person_a.is_contagious() and (not person_b.is_infected()):
             outcome = self._try_transmission(person_a, person_b)
 
