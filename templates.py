@@ -6,24 +6,24 @@ from viral_classes import Person, World, Disease
 
 # Disease constants
 DISEASES = {}
-DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.25,
+DISEASES['Virus X_01'] = {'transmission_base_prob' : 0.50,
                           'activate_mean' : 4.0,
-                          'activate_spread' : 2.0,
+                          'activate_spread' : 1.0,
                           'reveal_mean' : 8.0,
                           'reveal_spread' : 2.0,
                           'survive_mean' : 20.0,
                           'survive_spread' : 3.0,
-                          'succumb_mean' : 22.0,
+                          'succumb_mean' : 122.0,
                           'succumb_spread' : 3.0,
-                          'immunization_prob' : 1.00}
+                          'immunization_prob' : 0.00}
 
 # World constants
 WORLDS = {}
-WORLDS['World W_01'] = {'quarantine_policy' : 'revealed',
+WORLDS['World W_01'] = {'quarantine_policy' : None,
                         'persons_network_func' : 'population_well_mixed',
-                        'persons_network_kwargs' : {'n_people' : 5,
+                        'persons_network_kwargs' : {'n_people' : 2000,
                                                     'n_infect_init' : 1,
-                                                    'n_avg_meet' : 2}}
+                                                    'n_avg_meet' : 50}}
 
 # Social network creation methods
 def population_well_mixed(n_people, n_infect_init, n_avg_meet):
@@ -39,7 +39,7 @@ def population_well_mixed(n_people, n_infect_init, n_avg_meet):
     gg = nx.relabel_nodes(gg, dict([(k, p) for k, p in enumerate(people)]))
 
     # Put weight on social connections
-    f_weight = float(n_avg_meet) / float(n_people)
+    f_weight = float(n_avg_meet) / float(n_people - 1)
     nx.set_edge_attributes(gg, f_weight, 'weight')
 
     return gg
@@ -64,6 +64,7 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
             f.write('{}, {}\n'.format(key, value))
 
     # Run the simulation
+    open(out_file_name + '_data.csv', 'w').close()
     for k_day in range(n_days_max):
 
         print ('Simulate Day: {}'.format(k_day))
@@ -77,6 +78,8 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
         if the_world.is_disease_free():
             break
 
+    print (viral_disease.dummy_1, viral_disease.dummy_2, viral_disease.dummy_4, viral_disease.dummy_3)
+
 if __name__ == '__main__':
 
-    simulation('Virus X_01', 'World W_01', 100, 1, 'test_run')
+    simulation('Virus X_01', 'World W_01', 50, 1, 'test_run')
