@@ -2,7 +2,6 @@
 
 '''
 import pandas as pd
-import networkx as nx
 from numpy import random as rnd
 from scipy.stats import norm
 
