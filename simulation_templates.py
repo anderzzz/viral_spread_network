@@ -2,7 +2,7 @@ import pandas as pd
 import networkx as nx
 from numpy import random as rnd
 
-from viral_classes import Person, World, Disease
+from graph_growth_classes import Person, World, Disease
 
 # Disease constants
 DISEASES = {}

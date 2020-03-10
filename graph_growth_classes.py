@@ -6,7 +6,6 @@ import networkx as nx
 from numpy import random as rnd
 from scipy.stats import norm
 
-
 class _State():
     '''State of disease for a person and the state transition methods'''
 
@@ -353,7 +352,7 @@ class Disease():
                 second_outcome = False
 
             # If recover (or succumb) try event to immunize
-            if first_outcome or second_outcome:
+            if (first_outcome and event_first == 'recover') or (second_outcome and event_first == 'succumb'):
                 self._trial(person.immunize, None, lambda _ : self.immunization_prob)
 
         # If instead person is infected but not contagious, attempt to activate disease
@@ -384,5 +383,3 @@ class Disease():
         self.succumb_mean = succumb_mean
         self.succumb_spread = succumb_spread
         self.immunization_prob = immunization_prob
-
-
