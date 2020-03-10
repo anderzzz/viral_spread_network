@@ -46,6 +46,66 @@ DISEASES['Virus X_04'] = {'transmission_base_prob' : 1.0/30.0,
                           'succumb_mean' : 22.0,
                           'succumb_spread' : 3.0,
                           'immunization_prob' : 1.00}
+DISEASES['Virus Y_01'] = {'transmission_base_prob' : 1.0/60.0,
+                          'activate_mean' : 2.0,
+                          'activate_spread' : 1.0,
+                          'reveal_mean' : 5.0,
+                          'reveal_spread' : 2.0,
+                          'recover_mean' : 15.0,
+                          'recover_spread' : 3.0,
+                          'succumb_mean' : 20.0,
+                          'succumb_spread' : 3.0,
+                          'immunization_prob' : 1.00}
+DISEASES['Virus Y_02'] = {'transmission_base_prob' : 1.0/30.0,
+                          'activate_mean' : 2.0,
+                          'activate_spread' : 1.0,
+                          'reveal_mean' : 5.0,
+                          'reveal_spread' : 2.0,
+                          'recover_mean' : 15.0,
+                          'recover_spread' : 3.0,
+                          'succumb_mean' : 20.0,
+                          'succumb_spread' : 3.0,
+                          'immunization_prob' : 1.00}
+DISEASES['Virus Y_03'] = {'transmission_base_prob' : 1.0/60.0,
+                          'activate_mean' : 2.0,
+                          'activate_spread' : 1.0,
+                          'reveal_mean' : 4.0,
+                          'reveal_spread' : 2.0,
+                          'recover_mean' : 15.0,
+                          'recover_spread' : 3.0,
+                          'succumb_mean' : 20.0,
+                          'succumb_spread' : 3.0,
+                          'immunization_prob' : 1.00}
+DISEASES['Virus Y_04'] = {'transmission_base_prob' : 1.0/60.0,
+                          'activate_mean' : 2.0,
+                          'activate_spread' : 1.0,
+                          'reveal_mean' : 7.0,
+                          'reveal_spread' : 2.0,
+                          'recover_mean' : 15.0,
+                          'recover_spread' : 3.0,
+                          'succumb_mean' : 20.0,
+                          'succumb_spread' : 3.0,
+                          'immunization_prob' : 1.00}
+DISEASES['Virus Y_05'] = {'transmission_base_prob' : 1.0/60.0,
+                          'activate_mean' : 2.0,
+                          'activate_spread' : 1.0,
+                          'reveal_mean' : 5.0,
+                          'reveal_spread' : 2.0,
+                          'recover_mean' : 15.0,
+                          'recover_spread' : 3.0,
+                          'succumb_mean' : 25.0,
+                          'succumb_spread' : 3.0,
+                          'immunization_prob' : 1.00}
+DISEASES['Virus Y_06'] = {'transmission_base_prob' : 1.0/60.0,
+                          'activate_mean' : 2.0,
+                          'activate_spread' : 1.0,
+                          'reveal_mean' : 5.0,
+                          'reveal_spread' : 2.0,
+                          'recover_mean' : 15.0,
+                          'recover_spread' : 3.0,
+                          'succumb_mean' : 15.0,
+                          'succumb_spread' : 3.0,
+                          'immunization_prob' : 1.00}
 
 # World constants
 WORLDS = {}
@@ -120,15 +180,21 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
 
 if __name__ == '__main__':
 
-    simulation('Virus X_01', 'World W_01', 100, 1, 'test_run_1_1')
-    simulation('Virus X_02', 'World W_01', 100, 1, 'test_run_2_1')
-    simulation('Virus X_03', 'World W_01', 100, 1, 'test_run_3_1')
-    simulation('Virus X_04', 'World W_01', 100, 1, 'test_run_4_1')
-    simulation('Virus X_01', 'World W_02', 100, 1, 'test_run_1_2')
-    simulation('Virus X_02', 'World W_02', 100, 1, 'test_run_2_2')
-    simulation('Virus X_03', 'World W_02', 100, 1, 'test_run_3_2')
-    simulation('Virus X_04', 'World W_02', 100, 1, 'test_run_4_2')
-    simulation('Virus X_01', 'World W_03', 100, 1, 'test_run_1_3')
-    simulation('Virus X_02', 'World W_03', 100, 1, 'test_run_2_3')
-    simulation('Virus X_03', 'World W_03', 100, 1, 'test_run_3_3')
-    simulation('Virus X_04', 'World W_03', 100, 1, 'test_run_4_3')
+    simulation('Virus Y_01', 'World W_01', 120, 1, 'test_run_y_1_1')
+    simulation('Virus Y_02', 'World W_01', 120, 1, 'test_run_y_2_1')
+    simulation('Virus Y_03', 'World W_01', 120, 1, 'test_run_y_3_1')
+    simulation('Virus Y_04', 'World W_01', 120, 1, 'test_run_y_4_1')
+    simulation('Virus Y_05', 'World W_01', 120, 1, 'test_run_y_5_1')
+    simulation('Virus Y_06', 'World W_01', 120, 1, 'test_run_y_6_1')
+    simulation('Virus Y_01', 'World W_02', 120, 1, 'test_run_y_1_2')
+    simulation('Virus Y_02', 'World W_02', 120, 1, 'test_run_y_2_2')
+    simulation('Virus Y_03', 'World W_02', 120, 1, 'test_run_y_3_2')
+    simulation('Virus Y_04', 'World W_02', 120, 1, 'test_run_y_4_2')
+    simulation('Virus Y_05', 'World W_02', 120, 1, 'test_run_y_5_2')
+    simulation('Virus Y_06', 'World W_02', 120, 1, 'test_run_y_6_2')
+    simulation('Virus Y_01', 'World W_03', 120, 1, 'test_run_y_1_3')
+    simulation('Virus Y_02', 'World W_03', 120, 1, 'test_run_y_2_3')
+    simulation('Virus Y_03', 'World W_03', 120, 1, 'test_run_y_3_3')
+    simulation('Virus Y_04', 'World W_03', 120, 1, 'test_run_y_4_3')
+    simulation('Virus Y_05', 'World W_03', 120, 1, 'test_run_y_5_3')
+    simulation('Virus Y_06', 'World W_03', 120, 1, 'test_run_y_6_3')
