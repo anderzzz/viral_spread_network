@@ -8,139 +8,161 @@ from graph_growth_classes import Person, World, Disease
 
 # Disease constants
 DISEASES = {}
-DISEASES['Virus X_01'] = {'transmission_base_prob' : 1.0/30.0,
-                          'activate_mean' : 2.0,
-                          'activate_spread' : 1.0,
-                          'reveal_mean' : 10.0,
-                          'reveal_spread' : 2.0,
-                          'recover_mean' : 20.0,
-                          'recover_spread' : 3.0,
-                          'succumb_mean' : 22.0,
-                          'succumb_spread' : 3.0,
-                          'immunization_prob' : 1.00}
-DISEASES['Virus X_02'] = {'transmission_base_prob' : 1.0/10.0,
-                          'activate_mean' : 2.0,
-                          'activate_spread' : 1.0,
-                          'reveal_mean' : 10.0,
-                          'reveal_spread' : 2.0,
-                          'recover_mean' : 20.0,
-                          'recover_spread' : 3.0,
-                          'succumb_mean' : 22.0,
-                          'succumb_spread' : 3.0,
-                          'immunization_prob' : 1.00}
-DISEASES['Virus X_03'] = {'transmission_base_prob' : 1.0/30.0,
-                          'activate_mean' : 2.0,
-                          'activate_spread' : 1.0,
-                          'reveal_mean' : 10.0,
-                          'reveal_spread' : 2.0,
-                          'recover_mean' : 15.0,
-                          'recover_spread' : 3.0,
-                          'succumb_mean' : 22.0,
-                          'succumb_spread' : 3.0,
-                          'immunization_prob' : 1.00}
-DISEASES['Virus X_04'] = {'transmission_base_prob' : 1.0/30.0,
-                          'activate_mean' : 2.0,
-                          'activate_spread' : 1.0,
-                          'reveal_mean' : 7.0,
-                          'reveal_spread' : 2.0,
-                          'recover_mean' : 20.0,
-                          'recover_spread' : 3.0,
-                          'succumb_mean' : 22.0,
-                          'succumb_spread' : 3.0,
-                          'immunization_prob' : 1.00}
-DISEASES['Virus Y_01'] = {'transmission_base_prob' : 1.0/50.0,
+DISEASES['Virus Y Baseline'] = {'transmission_base_prob' : 1.0/50.0,
                           'activate_mean' : 2.0,
                           'activate_spread' : 1.0,
                           'reveal_mean' : 5.0,
                           'reveal_spread' : 2.0,
                           'recover_mean' : 15.0,
                           'recover_spread' : 3.0,
-                          'succumb_mean' : 20.0,
-                          'succumb_spread' : 3.0,
+                          'succumb_mean' : 200.0,
+                          'succumb_spread' : 1.0,
                           'immunization_prob' : 1.00}
-DISEASES['Virus Y_02'] = {'transmission_base_prob' : 1.0/25.0,
+DISEASES['Virus Y High Base Transmitter'] = {'transmission_base_prob' : 1.0/25.0,
                           'activate_mean' : 2.0,
                           'activate_spread' : 1.0,
                           'reveal_mean' : 5.0,
                           'reveal_spread' : 2.0,
                           'recover_mean' : 15.0,
                           'recover_spread' : 3.0,
-                          'succumb_mean' : 20.0,
-                          'succumb_spread' : 3.0,
+                          'succumb_mean' : 200.0,
+                          'succumb_spread' : 1.0,
                           'immunization_prob' : 1.00}
-DISEASES['Virus Y_03'] = {'transmission_base_prob' : 1.0/50.0,
+DISEASES['Virus Y Early Revealer'] = {'transmission_base_prob' : 1.0/50.0,
                           'activate_mean' : 2.0,
                           'activate_spread' : 1.0,
                           'reveal_mean' : 4.0,
                           'reveal_spread' : 2.0,
                           'recover_mean' : 15.0,
                           'recover_spread' : 3.0,
-                          'succumb_mean' : 20.0,
-                          'succumb_spread' : 3.0,
+                          'succumb_mean' : 200.0,
+                          'succumb_spread' : 1.0,
                           'immunization_prob' : 1.00}
-DISEASES['Virus Y_04'] = {'transmission_base_prob' : 1.0/50.0,
+DISEASES['Virus Y Late Revealer'] = {'transmission_base_prob' : 1.0/50.0,
                           'activate_mean' : 2.0,
                           'activate_spread' : 1.0,
                           'reveal_mean' : 7.0,
                           'reveal_spread' : 2.0,
                           'recover_mean' : 15.0,
                           'recover_spread' : 3.0,
-                          'succumb_mean' : 20.0,
-                          'succumb_spread' : 3.0,
+                          'succumb_mean' : 200.0,
+                          'succumb_spread' : 1.0,
                           'immunization_prob' : 1.00}
-DISEASES['Virus Y_05'] = {'transmission_base_prob' : 1.0/50.0,
-                          'activate_mean' : 2.0,
-                          'activate_spread' : 1.0,
-                          'reveal_mean' : 5.0,
-                          'reveal_spread' : 2.0,
-                          'recover_mean' : 15.0,
-                          'recover_spread' : 3.0,
-                          'succumb_mean' : 25.0,
-                          'succumb_spread' : 3.0,
-                          'immunization_prob' : 1.00}
-DISEASES['Virus Y_06'] = {'transmission_base_prob' : 1.0/50.0,
-                          'activate_mean' : 2.0,
-                          'activate_spread' : 1.0,
-                          'reveal_mean' : 5.0,
-                          'reveal_spread' : 2.0,
-                          'recover_mean' : 15.0,
-                          'recover_spread' : 3.0,
-                          'succumb_mean' : 15.0,
-                          'succumb_spread' : 3.0,
-                          'immunization_prob' : 1.00}
+DISEASES['Virus Y Imperfect Immunizer'] = {'transmission_base_prob' : 1.0/50.0,
+                                'activate_mean' : 2.0,
+                                'activate_spread' : 1.0,
+                                'reveal_mean' : 5.0,
+                                'reveal_spread' : 2.0,
+                                'recover_mean' : 15.0,
+                                'recover_spread' : 3.0,
+                                'succumb_mean' : 200.0,
+                                'succumb_spread' : 1.0,
+                                'immunization_prob' : 0.80}
+DISEASES['Virus Y More Imperfect Immunizer'] = {'transmission_base_prob' : 1.0/50.0,
+                                           'activate_mean' : 2.0,
+                                           'activate_spread' : 1.0,
+                                           'reveal_mean' : 5.0,
+                                           'reveal_spread' : 2.0,
+                                           'recover_mean' : 15.0,
+                                           'recover_spread' : 3.0,
+                                           'succumb_mean' : 200.0,
+                                           'succumb_spread' : 1.0,
+                                           'immunization_prob' : 0.50}
 
 # World constants
 WORLDS = {}
-WORLDS['World W_01'] = {'quarantine_policy' : None,
+WORLDS['World Complete Mix'] = {'quarantine_policy' : None,
                         'social_graph_func' : 'population_well_mixed',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 4,
-                                                 'n_avg_meet' : 60}}
-WORLDS['World W_02'] = {'quarantine_policy' : 'revealed',
+                                                 'n_infect_init' : 2,
+                                                 'n_avg_meet' : 50}}
+WORLDS['World Complete Mix Q'] = {'quarantine_policy' : 'revealed',
                         'social_graph_func' : 'population_well_mixed',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 4,
-                                                 'n_avg_meet' : 60}}
-WORLDS['World W_03'] = {'quarantine_policy' : 'revealed',
-                        'social_graph_func' : 'population_well_mixed',
-                        'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 4,
-                                                 'n_avg_meet' : 30}}
-WORLDS['World W_04'] = {'quarantine_policy' : None,
+                                                 'n_infect_init' : 2,
+                                                 'n_avg_meet' : 50}}
+WORLDS['World Small World Beta 0'] = {'quarantine_policy' : None,
                         'social_graph_func' : 'population_small_world',
                         'social_graph_kwargs' : {'n_people' : 1000,
                                                  'n_infect_init' : 4,
-                                                 'n_avg_meet' : 60}}
-WORLDS['World W_05'] = {'quarantine_policy' : 'revealed',
+                                                 'n_avg_meet' : 50,
+                                                 'beta' : 0.0}}
+WORLDS['World Small World Beta 0 Q'] = {'quarantine_policy' : 'revealed',
                         'social_graph_func' : 'population_small_world',
                         'social_graph_kwargs' : {'n_people' : 1000,
                                                  'n_infect_init' : 4,
-                                                 'n_avg_meet' : 60}}
-WORLDS['World W_06'] = {'quarantine_policy' : 'revealed',
-                        'social_graph_func' : 'population_small_world',
+                                                 'n_avg_meet' : 50,
+                                                 'beta' : 0.0}}
+WORLDS['World Small World Beta nn25'] = {'quarantine_policy' : None,
+                                      'social_graph_func' : 'population_small_world',
+                                      'social_graph_kwargs' : {'n_people' : 1000,
+                                                               'n_infect_init' : 4,
+                                                               'n_avg_meet' : 50,
+                                                               'beta' : 0.025}}
+WORLDS['World Small World Beta nn25 Q'] = {'quarantine_policy' : 'revealed',
+                                        'social_graph_func' : 'population_small_world',
+                                        'social_graph_kwargs' : {'n_people' : 1000,
+                                                                 'n_infect_init' : 4,
+                                                                 'n_avg_meet' : 50,
+                                                                 'beta' : 0.025}}
+WORLDS['World Small World Beta n10'] = {'quarantine_policy' : None,
+                                         'social_graph_func' : 'population_small_world',
+                                         'social_graph_kwargs' : {'n_people' : 1000,
+                                                                  'n_infect_init' : 4,
+                                                                  'n_avg_meet' : 50,
+                                                                  'beta' : 0.10}}
+WORLDS['World Small World Beta n10 Q'] = {'quarantine_policy' : 'revealed',
+                                           'social_graph_func' : 'population_small_world',
+                                           'social_graph_kwargs' : {'n_people' : 1000,
+                                                                    'n_infect_init' : 4,
+                                                                    'n_avg_meet' : 50,
+                                                                    'beta' : 0.10}}
+WORLDS['World Small World Beta n50'] = {'quarantine_policy' : None,
+                                        'social_graph_func' : 'population_small_world',
+                                        'social_graph_kwargs' : {'n_people' : 1000,
+                                                                 'n_infect_init' : 4,
+                                                                 'n_avg_meet' : 50,
+                                                                 'beta' : 0.50}}
+WORLDS['World Small World Beta n50 Q'] = {'quarantine_policy' : 'revealed',
+                                          'social_graph_func' : 'population_small_world',
+                                          'social_graph_kwargs' : {'n_people' : 1000,
+                                                                   'n_infect_init' : 4,
+                                                                   'n_avg_meet' : 50,
+                                                                   'beta' : 0.50}}
+WORLDS['World Small World Low K Beta n50'] = {'quarantine_policy' : None,
+                                        'social_graph_func' : 'population_small_world',
+                                        'social_graph_kwargs' : {'n_people' : 1000,
+                                                                 'n_infect_init' : 4,
+                                                                 'n_avg_meet' : 50,
+                                                                 'k_avg_degree' : 51,
+                                                                 'beta' : 0.50}}
+WORLDS['World Small World Low K Beta n50 Q'] = {'quarantine_policy' : 'revealed',
+                                          'social_graph_func' : 'population_small_world',
+                                          'social_graph_kwargs' : {'n_people' : 1000,
+                                                                   'n_infect_init' : 4,
+                                                                   'n_avg_meet' : 50,
+                                                                   'k_avg_degree': 51,
+                                                                   'beta' : 0.50}}
+WORLDS['World Caveman'] = {'quarantine_policy' : None,
+                        'social_graph_func' : 'population_caveman',
                         'social_graph_kwargs' : {'n_people' : 1000,
                                                  'n_infect_init' : 4,
-                                                 'n_avg_meet' : 30}}
+                                                 'n_avg_meet' : 50}}
+WORLDS['World Caveman Q'] = {'quarantine_policy' : 'revealed',
+                        'social_graph_func' : 'population_caveman',
+                        'social_graph_kwargs' : {'n_people' : 1000,
+                                                 'n_infect_init' : 4,
+                                                 'n_avg_meet' : 50}}
+WORLDS['World Relaxed Caveman'] = {'quarantine_policy' : None,
+                           'social_graph_func' : 'population_relaxed_caveman',
+                           'social_graph_kwargs' : {'n_people' : 1000,
+                                                    'n_infect_init' : 4,
+                                                    'n_avg_meet' : 50}}
+WORLDS['World Relaxed Caveman Q'] = {'quarantine_policy' : 'revealed',
+                             'social_graph_func' : 'population_relaxed_caveman',
+                             'social_graph_kwargs' : {'n_people' : 1000,
+                                                      'n_infect_init' : 4,
+                                                      'n_avg_meet' : 50}}
 
 # Social network creation methods
 def _make_persons(n_people, n_infect_init):
@@ -156,7 +178,9 @@ def _make_edge_weights(gg, n_avg_meet):
 
     n_edges = gg.size()
     n_nodes = len(gg)
-    f_weight = float(n_avg_meet) * n_nodes / n_edges
+    f_weight = 0.5 * float(n_avg_meet) * n_nodes / n_edges
+    if f_weight > 1.0:
+        raise ValueError('Too great weight: {}. Reduce average meetings or increase density of edges'.format(f_weight))
     nx.set_edge_attributes(gg, f_weight, 'weight')
 
     return gg
@@ -168,23 +192,53 @@ def population_well_mixed(n_people, n_infect_init, n_avg_meet):
 
     # Disperse population in a social network
     gg = nx.complete_graph(n_people)
-    gg = nx.relabel_nodes(gg, dict([(k, p) for k, p in enumerate(people)]))
     nx.readwrite.write_gml(gg, 'complete_graph.gml')
+    gg = nx.relabel_nodes(gg, dict([(k, p) for k, p in enumerate(people)]))
 
     # Put weight on social connections
     gg = _make_edge_weights(gg, n_avg_meet)
 
     return gg
 
-def population_small_world(n_people, n_infect_init, n_avg_meet):
+def population_small_world(n_people, n_infect_init, n_avg_meet, k_avg_degree=100, beta=(1.0/25.0)):
 
     # Generate people in population and seed with a few infected ones
     people = _make_persons(n_people, n_infect_init)
 
     # Disperse population in a social network
-    gg = nx.connected_watts_strogatz_graph(n_people, int(n_people / 10), 1.0/3.0, seed=42)
+    gg = nx.connected_watts_strogatz_graph(n_people, k_avg_degree, beta, seed=42)
+    nx.readwrite.write_gml(gg, 'small_world_graph_{}_{}.gml'.format(k_avg_degree, int(100.0 * beta)))
     gg = nx.relabel_nodes(gg, dict([(k, p) for k, p in enumerate(people)]))
-    nx.readwrite.write_gml(gg, 'small_world_graph.gml')
+
+    # Put weight on social connections
+    gg = _make_edge_weights(gg, n_avg_meet)
+
+    return gg
+
+def population_caveman(n_people, n_infect_init, n_avg_meet):
+
+    # Generate people in population and seed with a few infected ones
+    people = _make_persons(n_people, n_infect_init)
+
+    # Disperse population in a social network
+    gg = nx.connected_caveman_graph(10, int(n_people / 10))
+    nx.readwrite.write_gml(gg, 'caveman_graph.gml')
+    gg = nx.relabel_nodes(gg, dict([(k, p) for k, p in enumerate(people)]))
+
+    # Put weight on social connections
+    gg = _make_edge_weights(gg, n_avg_meet)
+
+    return gg
+
+def population_relaxed_caveman(n_people, n_infect_init, n_avg_meet):
+
+    # Generate people in population and seed with a few infected ones
+    people = _make_persons(n_people, n_infect_init)
+
+    # Disperse population in a social network
+    gg = nx.relaxed_caveman_graph(10, int(n_people / 10), 0.01, seed=42)
+    nx.readwrite.write_gml(gg, 'relaxed_caveman_graph.gml')
+    gg = nx.relabel_nodes(gg, dict([(k, p) for k, p in enumerate(people)]))
 
     # Put weight on social connections
     gg = _make_edge_weights(gg, n_avg_meet)
@@ -227,39 +281,10 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
 
 if __name__ == '__main__':
 
-    simulation('Virus Y_01', 'World W_01', 120, 1, 'test_run_y_1_1')
-    simulation('Virus Y_02', 'World W_01', 120, 1, 'test_run_y_2_1')
-    simulation('Virus Y_03', 'World W_01', 120, 1, 'test_run_y_3_1')
-    simulation('Virus Y_04', 'World W_01', 120, 1, 'test_run_y_4_1')
-    simulation('Virus Y_05', 'World W_01', 120, 1, 'test_run_y_5_1')
-    simulation('Virus Y_06', 'World W_01', 120, 1, 'test_run_y_6_1')
-   # simulation('Virus Y_01', 'World W_02', 120, 1, 'test_run_y_1_2')
-   # simulation('Virus Y_02', 'World W_02', 120, 1, 'test_run_y_2_2')
-   # simulation('Virus Y_03', 'World W_02', 120, 1, 'test_run_y_3_2')
-   # simulation('Virus Y_04', 'World W_02', 120, 1, 'test_run_y_4_2')
-   # simulation('Virus Y_05', 'World W_02', 120, 1, 'test_run_y_5_2')
-   # simulation('Virus Y_06', 'World W_02', 120, 1, 'test_run_y_6_2')
-   # simulation('Virus Y_01', 'World W_03', 120, 1, 'test_run_y_1_3')
-   # simulation('Virus Y_02', 'World W_03', 120, 1, 'test_run_y_2_3')
-   # simulation('Virus Y_03', 'World W_03', 120, 1, 'test_run_y_3_3')
-   # simulation('Virus Y_04', 'World W_03', 120, 1, 'test_run_y_4_3')
-   # simulation('Virus Y_05', 'World W_03', 120, 1, 'test_run_y_5_3')
-   # simulation('Virus Y_06', 'World W_03', 120, 1, 'test_run_y_6_3')
-   # simulation('Virus Y_01', 'World W_04', 120, 1, 'test_run_y_1_4')
-   # simulation('Virus Y_02', 'World W_04', 120, 1, 'test_run_y_2_4')
-   # simulation('Virus Y_03', 'World W_04', 120, 1, 'test_run_y_3_4')
-   # simulation('Virus Y_04', 'World W_04', 120, 1, 'test_run_y_4_4')
-   # simulation('Virus Y_05', 'World W_04', 120, 1, 'test_run_y_5_4')
-   # simulation('Virus Y_06', 'World W_04', 120, 1, 'test_run_y_6_4')
-   # simulation('Virus Y_01', 'World W_05', 120, 1, 'test_run_y_1_5')
-   # simulation('Virus Y_02', 'World W_05', 120, 1, 'test_run_y_2_5')
-   # simulation('Virus Y_03', 'World W_05', 120, 1, 'test_run_y_3_5')
-   # simulation('Virus Y_04', 'World W_05', 120, 1, 'test_run_y_4_5')
-   # simulation('Virus Y_05', 'World W_05', 120, 1, 'test_run_y_5_5')
-   # simulation('Virus Y_06', 'World W_05', 120, 1, 'test_run_y_6_5')
-   # simulation('Virus Y_01', 'World W_06', 120, 1, 'test_run_y_1_6')
-   # simulation('Virus Y_02', 'World W_06', 120, 1, 'test_run_y_2_6')
-   # simulation('Virus Y_03', 'World W_06', 120, 1, 'test_run_y_3_6')
-   # simulation('Virus Y_04', 'World W_06', 120, 1, 'test_run_y_4_6')
-   # simulation('Virus Y_05', 'World W_06', 120, 1, 'test_run_y_5_6')
-   # simulation('Virus Y_06', 'World W_06', 120, 1, 'test_run_y_6_6')
+    counter_1 = 0
+    for virus, v_kwargs in DISEASES.items():
+        counter_2 = 0
+        for world, w_kwargs in WORLDS.items():
+            simulation(virus, world, 120, 1, 'sim_out_{}_{}'.format(counter_1, counter_2))
+            counter_2 += 1
+        counter_1 += 1

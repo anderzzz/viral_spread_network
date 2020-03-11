@@ -107,6 +107,9 @@ class Person():
 
         return pd.concat([series_person, series_state, series_time])
 
+    def __str__(self):
+        return 'Person {}'.format(self.name)
+
     def __init__(self, name, caution_interaction=0.0, general_health=0.0):
 
         self.name = name

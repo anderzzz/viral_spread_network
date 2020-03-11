@@ -30,15 +30,21 @@ def growth_analysis(growth_file, property_label):
 
     return df_infected[['time_coordinate', 'property', 'N_people_Yes']]
 
-def growth_analysis_main(growth_files):
+def growth_analysis_main(growth_files, slice_name='infected'):
+
+    colors = brewer['PRGn'][max(3, len(growth_files))]
 
     p = figure(plot_width=650, plot_height=500, toolbar_location='above')
-    colors = brewer['Set3'][len(growth_files)]
-    for file, color in zip(growth_files, colors):
-        df_file = growth_analysis(file, 'infected')
-
+    for k, file in enumerate(growth_files):
+        df_file = growth_analysis(file, slice_name)
         source = ColumnDataSource(df_file)
-        p.line(x='time_coordinate', y='N_people_Yes', source=source, line_width=3, color=color)
+
+        line_dash = 'solid'
+
+        color = colors[k]
+
+        p.line(x='time_coordinate', y='N_people_Yes', source=source, line_width=3,
+               color=color, line_dash=line_dash)
 
     sims_renders = [(x, [g]) for (x, g) in zip(growth_files, p.renderers)]
     legend = Legend(items=sims_renders,
@@ -47,12 +53,14 @@ def growth_analysis_main(growth_files):
     p.add_layout(legend, "right")
 
     show(p)
-    raise RuntimeError
 
 if __name__ == '__main__':
 
-    sim_out_files = ['test_run_1_1_data.csv', 'test_run_1_2_data.csv', 'test_run_1_3_data.csv',
-                     'test_run_2_1_data.csv', 'test_run_2_2_data.csv', 'test_run_2_3_data.csv',
-                     'test_run_3_1_data.csv', 'test_run_3_2_data.csv', 'test_run_3_3_data.csv',
-                     'test_run_4_1_data.csv', 'test_run_4_2_data.csv', 'test_run_4_3_data.csv']
-    growth_analysis_main(sim_out_files)
+    cc_1 = [4]
+    cc_2 = [0,1,2,3,10,11]
+    inp = []
+    for c_1 in cc_1:
+        for c_2 in cc_2:
+            name = 'sim_out_{}_{}_data.csv'.format(c_1, c_2)
+            inp.append(name)
+    growth_analysis_main(inp, 'immune')
