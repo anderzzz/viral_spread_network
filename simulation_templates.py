@@ -74,95 +74,105 @@ WORLDS = {}
 WORLDS['World Complete Mix'] = {'quarantine_policy' : None,
                         'social_graph_func' : 'population_well_mixed',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 2,
+                                                 'n_infect_init' : 5,
                                                  'n_avg_meet' : 50}}
 WORLDS['World Complete Mix Q'] = {'quarantine_policy' : 'revealed',
                         'social_graph_func' : 'population_well_mixed',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 2,
+                                                 'n_infect_init' : 5,
                                                  'n_avg_meet' : 50}}
 WORLDS['World Small World Beta 0'] = {'quarantine_policy' : None,
                         'social_graph_func' : 'population_small_world',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 4,
+                                                 'n_infect_init' : 5,
                                                  'n_avg_meet' : 50,
                                                  'beta' : 0.0}}
 WORLDS['World Small World Beta 0 Q'] = {'quarantine_policy' : 'revealed',
                         'social_graph_func' : 'population_small_world',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 4,
+                                                 'n_infect_init' : 5,
                                                  'n_avg_meet' : 50,
                                                  'beta' : 0.0}}
 WORLDS['World Small World Beta nn25'] = {'quarantine_policy' : None,
                                       'social_graph_func' : 'population_small_world',
                                       'social_graph_kwargs' : {'n_people' : 1000,
-                                                               'n_infect_init' : 4,
+                                                               'n_infect_init' : 5,
                                                                'n_avg_meet' : 50,
                                                                'beta' : 0.025}}
 WORLDS['World Small World Beta nn25 Q'] = {'quarantine_policy' : 'revealed',
                                         'social_graph_func' : 'population_small_world',
                                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                                 'n_infect_init' : 4,
+                                                                 'n_infect_init' : 5,
                                                                  'n_avg_meet' : 50,
                                                                  'beta' : 0.025}}
 WORLDS['World Small World Beta n10'] = {'quarantine_policy' : None,
                                          'social_graph_func' : 'population_small_world',
                                          'social_graph_kwargs' : {'n_people' : 1000,
-                                                                  'n_infect_init' : 4,
+                                                                  'n_infect_init' : 5,
                                                                   'n_avg_meet' : 50,
                                                                   'beta' : 0.10}}
 WORLDS['World Small World Beta n10 Q'] = {'quarantine_policy' : 'revealed',
                                            'social_graph_func' : 'population_small_world',
                                            'social_graph_kwargs' : {'n_people' : 1000,
-                                                                    'n_infect_init' : 4,
+                                                                    'n_infect_init' : 5,
                                                                     'n_avg_meet' : 50,
                                                                     'beta' : 0.10}}
 WORLDS['World Small World Beta n50'] = {'quarantine_policy' : None,
                                         'social_graph_func' : 'population_small_world',
                                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                                 'n_infect_init' : 4,
+                                                                 'n_infect_init' : 5,
                                                                  'n_avg_meet' : 50,
                                                                  'beta' : 0.50}}
 WORLDS['World Small World Beta n50 Q'] = {'quarantine_policy' : 'revealed',
                                           'social_graph_func' : 'population_small_world',
                                           'social_graph_kwargs' : {'n_people' : 1000,
-                                                                   'n_infect_init' : 4,
+                                                                   'n_infect_init' : 5,
                                                                    'n_avg_meet' : 50,
                                                                    'beta' : 0.50}}
 WORLDS['World Small World Low K Beta n50'] = {'quarantine_policy' : None,
                                         'social_graph_func' : 'population_small_world',
                                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                                 'n_infect_init' : 4,
+                                                                 'n_infect_init' : 5,
                                                                  'n_avg_meet' : 50,
                                                                  'k_avg_degree' : 51,
                                                                  'beta' : 0.50}}
 WORLDS['World Small World Low K Beta n50 Q'] = {'quarantine_policy' : 'revealed',
                                           'social_graph_func' : 'population_small_world',
                                           'social_graph_kwargs' : {'n_people' : 1000,
-                                                                   'n_infect_init' : 4,
+                                                                   'n_infect_init' : 5,
                                                                    'n_avg_meet' : 50,
                                                                    'k_avg_degree': 51,
                                                                    'beta' : 0.50}}
 WORLDS['World Caveman'] = {'quarantine_policy' : None,
                         'social_graph_func' : 'population_caveman',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 4,
+                                                 'n_infect_init' : 5,
                                                  'n_avg_meet' : 50}}
 WORLDS['World Caveman Q'] = {'quarantine_policy' : 'revealed',
                         'social_graph_func' : 'population_caveman',
                         'social_graph_kwargs' : {'n_people' : 1000,
-                                                 'n_infect_init' : 4,
+                                                 'n_infect_init' : 5,
                                                  'n_avg_meet' : 50}}
 WORLDS['World Relaxed Caveman'] = {'quarantine_policy' : None,
                            'social_graph_func' : 'population_relaxed_caveman',
                            'social_graph_kwargs' : {'n_people' : 1000,
-                                                    'n_infect_init' : 4,
+                                                    'n_infect_init' : 5,
                                                     'n_avg_meet' : 50}}
 WORLDS['World Relaxed Caveman Q'] = {'quarantine_policy' : 'revealed',
                              'social_graph_func' : 'population_relaxed_caveman',
                              'social_graph_kwargs' : {'n_people' : 1000,
-                                                      'n_infect_init' : 4,
+                                                      'n_infect_init' : 5,
                                                       'n_avg_meet' : 50}}
+WORLDS['World ScaleFree'] = {'quarantine_policy' : None,
+                                   'social_graph_func' : 'population_barabasi_albert',
+                                   'social_graph_kwargs' : {'n_people' : 1000,
+                                                            'n_infect_init' : 5,
+                                                            'n_avg_meet' : 50}}
+WORLDS['World ScaleFree Q'] = {'quarantine_policy' : 'revealed',
+                                     'social_graph_func' : 'population_barabasi_albert',
+                                     'social_graph_kwargs' : {'n_people' : 1000,
+                                                              'n_infect_init' : 5,
+                                                              'n_avg_meet' : 50}}
 
 # Social network creation methods
 def _make_persons(n_people, n_infect_init):
@@ -245,6 +255,21 @@ def population_relaxed_caveman(n_people, n_infect_init, n_avg_meet):
 
     return gg
 
+def population_barabasi_albert(n_people, n_infect_init, n_avg_meet):
+
+    # Generate people in population and seed with a few infected ones
+    people = _make_persons(n_people, n_infect_init)
+
+    # Disperse population in a social network
+    gg = nx.barabasi_albert_graph(n_people, 60, seed=42)
+    nx.readwrite.write_gml(gg, 'barabasi_albert_graph.gml')
+    gg = nx.relabel_nodes(gg, dict([(k, p) for k, p in enumerate(people)]))
+
+    # Put weight on social connections
+    gg = _make_edge_weights(gg, n_avg_meet)
+
+    return gg
+
 def simulation(disease_name, world_name, n_days_max, report_interval, out_file_name):
 
     # Instantiate disease and world
@@ -281,10 +306,30 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
 
 if __name__ == '__main__':
 
-    counter_1 = 0
-    for virus, v_kwargs in DISEASES.items():
-        counter_2 = 0
-        for world, w_kwargs in WORLDS.items():
-            simulation(virus, world, 120, 1, 'sim_out_{}_{}'.format(counter_1, counter_2))
-            counter_2 += 1
-        counter_1 += 1
+    #counter_1 = 0
+    #for virus, v_kwargs in DISEASES.items():
+    #    counter_2 = 0
+    #    for world, w_kwargs in WORLDS.items():
+    #        simulation(virus, world, 120, 1, 'sim_out_{}_{}'.format(counter_1, counter_2))
+    #        counter_2 += 1
+    #    counter_1 += 1
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_00')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_01')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_02')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_03')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_04')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_05')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_06')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_07')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_08')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix Q', 120, 1, 'impimmun_complete_q_09')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_00')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_01')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_02')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_03')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_04')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_05')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_06')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_07')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_08')
+    simulation('Virus Y More Imperfect Immunizer', 'World Complete Mix', 120, 1, 'impimmun_complete_09')
