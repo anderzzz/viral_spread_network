@@ -71,6 +71,31 @@ WORLDS['Complete Mix Q'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.complete_graph,
                             'social_graph_creator_kwargs' : {'n' : 1000}}}
+WORLDS['Complete Mix Q Cautious 50_200'] = \
+    {'quarantine_policy' : 'revealed',
+           'social_graph': {'n_people': 1000,
+                            'n_infect_init': 5,
+                            'n_avg_meet': 50,
+                            'caution_level' : 0.5,
+                            'cautious_size' : 200,
+                            'social_graph_creator': nx.complete_graph,
+                            'social_graph_creator_kwargs' : {'n' : 1000}}}
+WORLDS['Complete Mix Q Cautious 50_100'] = \
+    {'quarantine_policy' : 'revealed',
+     'social_graph': {'n_people': 1000,
+                      'n_infect_init': 5,
+                      'n_avg_meet': 50,
+                      'caution_level' : 0.5,
+                      'cautious_size' : 100,
+                      'social_graph_creator': nx.complete_graph,
+                      'social_graph_creator_kwargs' : {'n' : 1000}}}
+WORLDS['Complete Mix Q 50p Less Meet'] = \
+    {'quarantine_policy' : 'revealed',
+           'social_graph': {'n_people': 1000,
+                            'n_infect_init': 5,
+                            'n_avg_meet': 25,
+                            'social_graph_creator': nx.complete_graph,
+                            'social_graph_creator_kwargs' : {'n' : 1000}}}
 WORLDS['Small World Beta 0'] = \
           {'quarantine_policy' : None,
            'social_graph': {'n_people': 1000,
@@ -146,17 +171,27 @@ WORLDS['Relaxed Caveman Q'] = \
            'social_graph': {'n_people': 1000,
                             'n_infect_init': 5,
                             'n_avg_meet': 50,
-                            'social_graph_creator': nx.connected_watts_strogatz_graph,
+                            'social_graph_creator': nx.relaxed_caveman_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
                                                              'l' : 10,
                                                              'p' : 0.01,
                                                              'seed' : 42}}}
 
-def make_persons(n_people, n_infect_init=1):
+def make_persons(n_people, n_infect_init=1, caution_level=0.0, cautious_size=0):
     '''Create persons to simulate and infected subset
 
     '''
+    if cautious_size > n_people:
+        raise ValueError('Number of cautious persons must be less than total')
+
     people = [Person('Person {}'.format(k)) for k in range(n_people)]
+
+    if cautious_size > 0:
+        inds = list(range(n_people))
+        rnd.shuffle(inds)
+        for ind_more_cautious in inds[0:cautious_size]:
+            people[ind_more_cautious].caution_interaction = caution_level
+
     for k_infect in rnd.randint(0, n_people, n_infect_init):
         people[k_infect].infect()
 
@@ -176,12 +211,13 @@ def make_edge_weights(graph, n_avg_meet):
     return graph
 
 def create_population(n_people, n_infect_init, n_avg_meet,
+                      caution_level=0.0, cautious_size=0,
                       social_graph_creator = None,
                       social_graph_creator_kwargs = {}):
     '''Create population of people in a social graph
 
     '''
-    people = make_persons(n_people, n_infect_init)
+    people = make_persons(n_people, n_infect_init, caution_level, cautious_size)
 
     if not callable(social_graph_creator):
         raise ValueError('Social graph creator required to be executable')
@@ -239,6 +275,14 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
 
 if __name__ == '__main__':
 
-    simulation('Virus Y Baseline', 'Complete Mix Q', 120, 1, 'test0')
-    simulation('Virus Y Baseline', 'Relaxed Caveman', 120, 1, 'test1')
-    simulation('Virus Y Baseline', 'Small World Beta 1p', 120, 1, 'test2')
+    #for k in range(5):
+    #    simulation('Virus Y Baseline', 'Complete Mix Q', 120, 1, 'test0_{}'.format(k))
+    #    simulation('Virus Y Baseline', 'Complete Mix Q Cautious 50_200', 120, 1, 'test0a_{}'.format(k))
+    #    simulation('Virus Y Baseline', 'Complete Mix Q Cautious 50_100', 120, 1, 'test0b_{}'.format(k))
+    #    simulation('Virus Y Baseline', 'Complete Mix Q 50p Less Meet', 120, 1, 'test0c_{}'.format(k))
+
+    for k1, dd in enumerate(DISEASES):
+        for k2, ww in enumerate(WORLDS):
+            if k1 == 0 and k2 in list(range(12)):
+                continue
+            simulation(dd,ww, 120, 1, 'ddww_{}_{}'.format(k1,k2))
