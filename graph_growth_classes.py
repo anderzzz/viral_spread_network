@@ -40,12 +40,13 @@ class _State():
         '''Report current state'''
         return pd.Series(data=[self.infected, self.contagious, self.revealed,
                                self.immune, self.dead, self.quarantined],
-                         index=self.state_labels)
+                         index=['infected', 'contagious', 'revealed',
+                                'immune', 'dead', 'quarantined'])
 
     def __init__(self, infected=False, contagious=False, revealed=False,
                  immune=False, dead=False, quarantined=False):
 
-        self.state_labels = ['infected', 'contagious', 'revealed', 'immune', 'dead', 'quarantined']
+        self.transition_labels = ['infect', 'activate', 'reveal', 'recover', 'immunize', 'succumb', 'quarantine']
         self.infected = infected
         self.contagious = contagious
         self.revealed = revealed
@@ -91,6 +92,9 @@ class Person():
         '''Decorate the state change function with the recording of a time stamp'''
 
         def mapper():
+            if not label in self.time_stamp:
+                raise RuntimeError('Unrecognized state transition label {}'.format(label))
+
             self.time_stamp[label] = self.time_coordinate
             func()
 
@@ -119,7 +123,7 @@ class Person():
         self.general_health = general_health
 
         self.state = _State()
-        self.time_stamp = dict([(label, None) for label in self.state.state_labels])
+        self.time_stamp = dict([(label, None) for label in self.state.transition_labels])
 
         self.infect = self._decorate_time_stamp(self.state.infect, 'infect')
         self.succumb = self._decorate_time_stamp(self.state.succumb, 'succumb')
@@ -187,6 +191,11 @@ class World():
         no person can become infected, hence a stable state has been attained.'''
         return not any([person.is_infected() for person in self.social_graph.nodes])
 
+    def synchronize(self, global_time):
+        '''Set all persons of the world to the same time'''
+        for person in self.social_graph.nodes:
+            person.time_coordinate = global_time
+
     def report(self):
         '''Report data about the world, including its persons and their disease state at current time'''
         total_df_data = []
@@ -242,6 +251,7 @@ class Disease():
         '''Make disease progress one more day in the world'''
 
         self.day_counter += 1
+        world.synchronize(self.day_counter)
 
         # Transmit disease between people
         for pp_interaction in world.social_graph.edges:
@@ -249,7 +259,10 @@ class Disease():
             person_b = pp_interaction[1]
 
             if world.do_they_meet_today(person_a, person_b):
-                self._progression_edge(person_a, person_b)
+                transmit_happened = self._progression_edge(person_a, person_b)
+
+                if transmit_happened and self.transmit_trajectory:
+                    self._stamp_trajectory(person_a, person_b)
 
         # Evolve disease state within people
         persons_dead = []
@@ -262,6 +275,30 @@ class Disease():
         if world.delete_dead_from_social_graph:
             world.social_graph.remove_nodes_from(persons_dead)
         world.enact_quarantine_policy()
+
+    def _stamp_trajectory(self, p_a, p_b):
+        '''Add trajectory item for transmission event'''
+
+        time_stamp_a = p_a.time_stamp['infect']
+        time_stamp_b = p_b.time_stamp['infect']
+        if time_stamp_a == self.day_counter:
+            p_transmitter = p_b
+            p_receiver = p_a
+        elif time_stamp_b == self.day_counter:
+            p_transmitter = p_a
+            p_receiver = p_b
+        else:
+            raise RuntimeError('Faulty transmission to already infected person encountered')
+
+        delta_t = self.day_counter - p_transmitter.time_stamp['infect']
+
+        with open(self.transmit_trajectory_file, 'a') as fout:
+            if fout.tell() == 0:
+                print('transmitter,receiver,time since transmitter infected,day counter', file=fout)
+
+            print('{},{},{},{}'.format(p_transmitter.name, p_receiver.name,
+                                       delta_t, self.day_counter),
+                  file=fout)
 
     def _try_transmission(self, transmitter, receiver):
         '''Attempt transmission of disease between a contagious transmitter and a healthy receiver'''
@@ -363,17 +400,17 @@ class Disease():
                         {'loc' : self.activate_mean,
                          'scale' : self.activate_spread})
 
-        person.time_coordinate = self.day_counter
-
     def __init__(self, name, transmission_base_prob,
                        activate_mean, activate_spread,
                        reveal_mean, reveal_spread,
                        recover_mean, recover_spread,
                        succumb_mean, succumb_spread,
-                       immunization_prob):
+                       immunization_prob,
+                 transmit_trajectory_file=None,
+                 day_counter_init=0):
 
         self.name = name
-        self.day_counter = 0
+        self.day_counter = day_counter_init
 
         self.transmission_base_prob = transmission_base_prob
         self.activate_mean = activate_mean
@@ -385,3 +422,10 @@ class Disease():
         self.succumb_mean = succumb_mean
         self.succumb_spread = succumb_spread
         self.immunization_prob = immunization_prob
+
+        if not transmit_trajectory_file is None:
+            self.transmit_trajectory = True
+            self.transmit_trajectory_file = transmit_trajectory_file
+        else:
+            self.transmit_trajectory = False
+
