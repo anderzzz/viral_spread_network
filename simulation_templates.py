@@ -62,13 +62,15 @@ WORLDS['Complete Mix'] = \
            'social_graph': {'n_people': 1000,
                             'n_infect_init': 5,
                             'n_avg_meet': 50,
-                            'social_graph_creator': nx.complete_graph}}
+                            'social_graph_creator': nx.complete_graph,
+                            'social_graph_creator_kwargs': {'n': 1000}}}
 WORLDS['Complete Mix Q'] = \
-          {'quarantine_policy' : 'revealed',
+    {'quarantine_policy' : 'revealed',
            'social_graph': {'n_people': 1000,
                             'n_infect_init': 5,
                             'n_avg_meet': 50,
-                            'social_graph_creator': nx.complete_graph}}
+                            'social_graph_creator': nx.complete_graph,
+                            'social_graph_creator_kwargs' : {'n' : 1000}}}
 WORLDS['Small World Beta 0'] = \
           {'quarantine_policy' : None,
            'social_graph': {'n_people': 1000,
@@ -76,6 +78,7 @@ WORLDS['Small World Beta 0'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.connected_watts_strogatz_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'n' : 1000,
                                                              'p' : 0.0,
                                                              'seed' : 42}}}
 WORLDS['Small World Beta 0 Q'] = \
@@ -85,6 +88,7 @@ WORLDS['Small World Beta 0 Q'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.connected_watts_strogatz_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'n' : 1000,
                                                              'p' : 0.0,
                                                              'seed' : 42}}}
 WORLDS['Small World Beta 1p'] = \
@@ -94,6 +98,7 @@ WORLDS['Small World Beta 1p'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.connected_watts_strogatz_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'n' : 1000,
                                                              'p' : 0.01,
                                                              'seed' : 42}}}
 WORLDS['Small World Beta 1p Q'] = \
@@ -103,6 +108,7 @@ WORLDS['Small World Beta 1p Q'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.connected_watts_strogatz_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'n' : 1000,
                                                              'p' : 0.01,
                                                              'seed' : 42}}}
 WORLDS['Small World Beta 10p'] = \
@@ -112,6 +118,7 @@ WORLDS['Small World Beta 10p'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.connected_watts_strogatz_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'n' : 1000,
                                                              'p' : 0.1,
                                                              'seed' : 42}}}
 WORLDS['Small World Beta 10p Q'] = \
@@ -121,6 +128,7 @@ WORLDS['Small World Beta 10p Q'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.connected_watts_strogatz_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'n' : 1000,
                                                              'p' : 0.1,
                                                              'seed' : 42}}}
 WORLDS['Relaxed Caveman'] = \
@@ -130,6 +138,7 @@ WORLDS['Relaxed Caveman'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.relaxed_caveman_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'l' : 10,
                                                              'p' : 0.01,
                                                              'seed' : 42}}}
 WORLDS['Relaxed Caveman Q'] = \
@@ -139,6 +148,7 @@ WORLDS['Relaxed Caveman Q'] = \
                             'n_avg_meet': 50,
                             'social_graph_creator': nx.connected_watts_strogatz_graph,
                             'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'l' : 10,
                                                              'p' : 0.01,
                                                              'seed' : 42}}}
 
@@ -176,9 +186,8 @@ def create_population(n_people, n_infect_init, n_avg_meet,
     if not callable(social_graph_creator):
         raise ValueError('Social graph creator required to be executable')
 
-    social_graph = social_graph_creator(n_people, **social_graph_creator_kwargs)
+    social_graph = social_graph_creator(**social_graph_creator_kwargs)
     social_graph = nx.relabel_nodes(social_graph, dict([(k, p) for k, p in enumerate(people)]))
-
     social_graph = make_edge_weights(social_graph, n_avg_meet)
 
     return social_graph
@@ -217,7 +226,6 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
     # Run the simulation
     open(out_file_name + '_data.csv', 'w').close()
     for k_day in range(n_days_max):
-
         print ('Simulate Day: {}'.format(k_day + 1))
 
         viral_disease.progress_one_more_day(the_world)
