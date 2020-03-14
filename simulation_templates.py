@@ -617,9 +617,9 @@ if __name__ == '__main__':
                  'Small World Beta 0 Q Cautious 50_200', 'Small World Beta 1p Q Cautious 50_200',
                  'Relaxed Caveman', 'Relaxed Caveman Cautious 50_200', 'Relaxed Caveman Q']
     short_label = {'Virus Y Baseline' : 'baseline',
-                   'Virus Y Delated Recovery' : 'delayed',
+                   'Virus Y Delayed Recovery' : 'delayed',
                    'Virus Y High Base Transmitter' : 'rapid',
-                   'Complete Mix' : 'complete',
+#                   'Complete Mix' : 'complete',
                    'Complete Mix Q' : 'completeQ',
                    'Complete Mix Q Cautious 50_200' : 'completeQC50200',
                    'Complete Mix Q Cautious 50_100' : 'completeQC50100',
@@ -645,6 +645,9 @@ if __name__ == '__main__':
     for ww in world_sim:
         if not ww in WORLDS.keys():
             raise ValueError('World label {} not in WORLDS'.format(ww))
+    for label in short_label:
+        if not ((label in disease_sim) or (label in world_sim)):
+            raise ValueError('Label {} not in World or Disease'.format(label))
 
     for repeat_index in range(sim_repeater):
         for disease in disease_sim:
