@@ -210,6 +210,20 @@ WORLDS['Small World Beta 0 Cautious 50_200'] = \
                                                        'p' : 0.0,
                                                        'seed' : 42}}}
 #
+# Ring lattice graph 100 neighbours, with reactive quarantine, 20% of people 50% more cautious
+WORLDS['Small World Beta 0 Q Cautious 50_200'] = \
+    {'quarantine_policy' : 'revealed',
+     'social_graph': {'n_people': 1000,
+                      'n_infect_init': 5,
+                      'n_avg_meet': 50,
+                      'caution_level': 0.5,
+                      'cautious_size': 200,
+                      'social_graph_creator': nx.connected_watts_strogatz_graph,
+                      'social_graph_creator_kwargs' : {'k' : 100,
+                                                       'n' : 1000,
+                                                       'p' : 0.0,
+                                                       'seed' : 42}}}
+#
 # Ring lattice graph 100 neighbours, no reactive quarantine, 10% of people 50% more cautious
 WORLDS['Small World Beta 0 Cautious 50_100'] = \
     {'quarantine_policy' : None,
@@ -251,6 +265,20 @@ WORLDS['Small World Beta 1p'] = \
 # Small world graph 100 neighbours beta 1%, no reactive quarantine, 20% of people 50% more cautious
 WORLDS['Small World Beta 1p Cautious 50_200'] = \
           {'quarantine_policy' : None,
+           'social_graph': {'n_people': 1000,
+                            'n_infect_init': 5,
+                            'n_avg_meet': 50,
+                            'caution_level': 0.5,
+                            'cautious_size': 200,
+                            'social_graph_creator': nx.connected_watts_strogatz_graph,
+                            'social_graph_creator_kwargs' : {'k' : 100,
+                                                             'n' : 1000,
+                                                             'p' : 0.01,
+                                                             'seed' : 42}}}
+#
+# Small world graph 100 neighbours beta 1%, with reactive quarantine, 20% of people 50% more cautious
+WORLDS['Small World Beta 1p Q Cautious 50_200'] = \
+          {'quarantine_policy' : 'revealed',
            'social_graph': {'n_people': 1000,
                             'n_infect_init': 5,
                             'n_avg_meet': 50,
@@ -580,17 +608,32 @@ def simulation(disease_name, world_name, n_days_max, report_interval, out_file_n
 
 if __name__ == '__main__':
 
-    disease_sim = ['Virus Y Baseline']
-#    world_sim = ['Complete Mix', 'Complete Mix Cautious 50_200', 'Complete Mix Cautious 50_100',
-#                 'Complete Mix Cautious 25_200', 'Complete Mix Cautious 25_100']
-    world_sim = ['Complete Mix Q', 'Complete Mix Q Cautious 50_200', 'Complete Mix Q Cautious 50_100',
-                 'Complete Mix Q Cautious 25_200', 'Complete Mix Q Cautious 25_100']
+    disease_sim = ['Virus Y Baseline', 'Virus Y Delayed Recovery', 'Virus Y High Base Transmitter']
+    world_sim = ['Complete Mix Q',
+                 'Complete Mix Q Cautious 50_200', 'Complete Mix Q Cautious 50_100',
+                 'Complete Mix Q Cautious 25_200', 'Complete Mix Q Cautious 25_100',
+                 'Small World Beta 0', 'Small World Beta 1p',
+                 'Small World Beta 0 Q', 'Small World Beta 1p Q',
+                 'Small World Beta 0 Q Cautious 50_200', 'Small World Beta 1p Q Cautious 50_200',
+                 'Relaxed Caveman', 'Relaxed Caveman Cautious 50_200', 'Relaxed Caveman Q']
     short_label = {'Virus Y Baseline' : 'baseline',
+                   'Virus Y Delated Recovery' : 'delayed',
+                   'Virus Y High Base Transmitter' : 'rapid',
+                   'Complete Mix' : 'complete',
                    'Complete Mix Q' : 'completeQ',
                    'Complete Mix Q Cautious 50_200' : 'completeQC50200',
                    'Complete Mix Q Cautious 50_100' : 'completeQC50100',
                    'Complete Mix Q Cautious 25_200' : 'completeQC25200',
-                   'Complete Mix Q Cautious 25_100' : 'completeQC25100'}
+                   'Complete Mix Q Cautious 25_100' : 'completeQC25100',
+                   'Small World Beta 0' : 'ringlattice',
+                   'Small World Beta 1p' : 'smallworld1p',
+                   'Small World Beta 0 Q' : 'ringlatticeQ',
+                   'Small World Beta 1p Q' : 'smallworld1pQ',
+                   'Small World Beta 0 Q Cautious 50_200' : 'ringlatticeQC50200',
+                   'Small World Beta 1p Q Cautious 50_200' : 'smallworld1pQC50200',
+                   'Relaxed Caveman' : 'caveman',
+                   'Relaxed Caveman Cautious 50_200' : 'cavemanC50200',
+                   'Relaxed Caveman Q' : 'cavemanQ'}
 
     sim_repeater = 5
     sim_max_steps = 120
@@ -607,4 +650,7 @@ if __name__ == '__main__':
         for disease in disease_sim:
             for world in world_sim:
                 out_name_prefix = 'simfile_{}_{}_{}'.format(short_label[disease], short_label[world], repeat_index)
-                simulation(disease, world, sim_max_steps, sim_reporter_interval, out_name_prefix)
+                try:
+                    simulation(disease, world, sim_max_steps, sim_reporter_interval, out_name_prefix)
+                except:
+                    print ('Problem: {}, {}, {}'.format(repeat_index,disease,world))

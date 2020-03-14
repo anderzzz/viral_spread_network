@@ -3,8 +3,9 @@
 '''
 import pandas as pd
 import numpy as np
-from bokeh.models import ColumnDataSource, Legend
+from bokeh.models import ColumnDataSource, Legend, LinearAxis, SingleIntervalTicker
 from bokeh.plotting import figure, show
+from bokeh.layouts import column
 from bokeh.palettes import brewer
 
 def _bool_to_int(row):
@@ -105,37 +106,96 @@ def state_analysis_main(state_files, slice_name='infected', data_names=None,
     else:
         p.xaxis.axis_label = 'Days since start'
 
-    show(p)
+    #show(p)
 
-def trajectory_analysis_main(traj_files, group_indeces=None):
+def trajectory_analysis_main(traj_files, group_indeces=None, nth_infected=200):
     '''Main analysis function for the trajectory data
 
     '''
-    dfs_process = []
+    dfs_transmit_events = []
+    dfs_transmit_lags = []
     for k, file in enumerate(traj_files):
         df = pd.read_csv(file)
 
-        # Determine day of maximum in-flow of infected
-        g1 = df.groupby(['day counter']).count()
-        day_max_inflow = g1['transmitter'].idxmax()
-        print (day_max_inflow)
+        # Select the earliest infections
+        df_early = df.iloc[:nth_infected]
 
-        # Disease transmissions per infected up until day of maximum in-flow
-        df_uptopeak = df.loc[df['day counter'] <= day_max_inflow]
-        g2 = df_uptopeak.groupby(['transmitter']).count()
-        df_transmit_per_infected = g2.groupby('receiver').count()
-        total_count = df_transmit_per_infected['day counter'].sum()
-        df_transmit_per_infected['empirical frequency'] = df_transmit_per_infected['day counter'].div(total_count)
-        print (df_transmit_per_infected)
-        dfs_process.append(df_transmit_per_infected.drop(['time since transmitter infected',
-                                                         'day counter'], axis=1))
+        # Determine cases infected but never transmitting
+        s_receive = set(df_early['receiver'].array)
+        s_transmit_all = set(df['transmitter'].array)
+        receive_never_transmit = s_receive - s_transmit_all
+        df_index = pd.Index(receive_never_transmit, name='receiver')
+        df_0_count = pd.DataFrame(data=[0] * len(df_index), index=df_index, columns=['day counter'])
+        n_0_count = len(df_0_count)
+
+        # Determine cases infected and transmitting and how many times
+        df_transmits = df.loc[df['transmitter'].isin(df_early['receiver'])]
+        df_transmits_per_transmitter = df_transmits.groupby(['transmitter']).count()
+        df_transmits_count = df_transmits_per_transmitter.groupby('receiver').count()
+        df_transmits_count.loc[0] = n_0_count
+
+        # Normalize so empirical frequency of number of infection transmits is obtained
+        total_count = df_transmits_count['day counter'].sum()
+        df_transmits_count['empirical frequency'] = df_transmits_count['day counter'].div(total_count)
+        dfs_transmit_events.append(df_transmits_count.drop(['time since transmitter infected', 'day counter'], axis=1))
+
+        # Compute empirical frequency of lag between infection transmits
+        df_transmits_lag = df_transmits.groupby('time since transmitter infected').count()
+        total_count = df_transmits_lag['day counter'].sum()
+        df_transmits_lag['empirical frequency'] = df_transmits_lag['day counter'].div(total_count)
+        dfs_transmit_lags.append(df_transmits_lag.drop(['transmitter', 'receiver', 'day counter'], axis=1))
 
     # Aggregate data groups
     if not group_indeces is None:
-        dfs_groups = []
-        for group_df in [[dfs_process[k] for k in group] for group in group_indeces]:
-            df_mean_freq = pd.concat(group_df).groupby('receiver').mean()
-            print (df_mean_freq)
+        dfs_groups1 = []
+        for group_df in [[dfs_transmit_events[k] for k in group] for group in group_indeces]:
+            df_mean_freq1 = pd.concat(group_df).groupby('receiver').mean()
+            dfs_groups1.append(df_mean_freq1)
+
+        dfs_groups2 = []
+        for group_df in [[dfs_transmit_lags[k] for k in group] for group in group_indeces]:
+            df_mean_freq2 = pd.concat(group_df).groupby('time since transmitter infected').mean()
+            dfs_groups2.append(df_mean_freq2)
+
+    else:
+        raise NotImplementedError('Trajectory analysis without grouper not implemented')
+
+    source1_to_plot = [ColumnDataSource(df) for df in dfs_groups1]
+    source2_to_plot = [ColumnDataSource(df) for df in dfs_groups2]
+
+    colors = brewer['PRGn'][max(4, len(source1_to_plot))]
+    if len(source1_to_plot) == 3:
+        colors = [colors[k] for k in [0,1,3]]
+    elif len(source1_to_plot) == 2:
+        colors = [colors[k] for k in [0,3]]
+
+    p1 = figure(plot_width=650, plot_height=500, toolbar_location='above')
+    for k, source in enumerate(source1_to_plot):
+
+        p1.circle(x='receiver', y='empirical frequency', source=source, line_width=3,
+                color=colors[k], line_dash='solid', size=10)
+        p1.line(x='receiver', y='empirical frequency', source=source, line_width=1,
+                 color=colors[k], line_dash='dotted')
+
+    p1.xaxis.axis_label = 'Number of transmissions to other persons'
+    p1.yaxis.axis_label = 'Normalized Frequency'
+    p1.xaxis.ticker = SingleIntervalTicker(interval=1)
+    p1.xaxis.minor_tick_line_color = None
+
+    p2 = figure(plot_width=650, plot_height=500, toolbar_location='above')
+    for k, source in enumerate(source2_to_plot):
+
+        p2.circle(x='time since transmitter infected', y='empirical frequency', source=source, line_width=3,
+               color=colors[k], line_dash='solid', size=10)
+        p2.line(x='time since transmitter infected', y='empirical frequency', source=source, line_width=1,
+                  color=colors[k], line_dash='dotted')
+
+    p2.xaxis.axis_label = 'Days after transmitter was infected'
+    p2.yaxis.axis_label = 'Normalized Frequency'
+    p2.xaxis.ticker = SingleIntervalTicker(interval=1)
+    p2.xaxis.minor_tick_line_color = None
+
+    show(column(p1,p2))
 
 if __name__ == '__main__':
 
@@ -148,25 +208,37 @@ if __name__ == '__main__':
     #        inp.append(name)
     #growth_analysis_main(inp, 'infected')
 
+#    state_analysis_main(['simfile_baseline_complete_0_data.csv', 'simfile_baseline_complete_1_data.csv',
+#                         'simfile_baseline_complete_2_data.csv', 'simfile_baseline_complete_3_data.csv',
+#                         'simfile_baseline_complete_4_data.csv', 'simfile_baseline_completeC50200_0_data.csv',
+#                         'simfile_baseline_completeC50200_1_data.csv', 'simfile_baseline_completeC50200_2_data.csv',
+#                         'simfile_baseline_completeC50200_3_data.csv', 'simfile_baseline_completeC50200_4_data.csv',
+#                         'simfile_baseline_completeC50100_0_data.csv', 'simfile_baseline_completeC50100_1_data.csv',
+#                         'simfile_baseline_completeC50100_2_data.csv', 'simfile_baseline_completeC50100_3_data.csv',
+#                         'simfile_baseline_completeC50100_4_data.csv', 'simfile_baseline_completeC25200_0_data.csv',
+#                         'simfile_baseline_completeC25200_1_data.csv', 'simfile_baseline_completeC25200_2_data.csv',
+#                         'simfile_baseline_completeC25200_3_data.csv', 'simfile_baseline_completeC25200_4_data.csv',
+#                         'simfile_baseline_completeC25100_0_data.csv',
+#                         'simfile_baseline_completeC25100_1_data.csv', 'simfile_baseline_completeC25100_2_data.csv',
+#                         'simfile_baseline_completeC25100_3_data.csv', 'simfile_baseline_completeC25100_4_data.csv'],
+#    slice_name='infected',
+#                        data_names=None,
+#                        shifter_key='first_above_thrs',
+#                        shifter_kwargs={'thrs':50},
+#                        group_indeces=[[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24]],
+#                        agg_func=np.mean)
+
     state_analysis_main(['simfile_baseline_complete_0_data.csv', 'simfile_baseline_complete_1_data.csv',
                          'simfile_baseline_complete_2_data.csv', 'simfile_baseline_complete_3_data.csv',
-                         'simfile_baseline_complete_4_data.csv', 'simfile_baseline_completeC50200_0_data.csv',
-                         'simfile_baseline_completeC50200_1_data.csv', 'simfile_baseline_completeC50200_2_data.csv',
-                         'simfile_baseline_completeC50200_3_data.csv', 'simfile_baseline_completeC50200_4_data.csv',
-                         'simfile_baseline_completeC50100_0_data.csv', 'simfile_baseline_completeC50100_1_data.csv',
-                         'simfile_baseline_completeC50100_2_data.csv', 'simfile_baseline_completeC50100_3_data.csv',
-                         'simfile_baseline_completeC50100_4_data.csv', 'simfile_baseline_completeC25200_0_data.csv',
-                         'simfile_baseline_completeC25200_1_data.csv', 'simfile_baseline_completeC25200_2_data.csv',
-                         'simfile_baseline_completeC25200_3_data.csv', 'simfile_baseline_completeC25200_4_data.csv',
-                         'simfile_baseline_completeC25100_0_data.csv',
-                         'simfile_baseline_completeC25100_1_data.csv', 'simfile_baseline_completeC25100_2_data.csv',
-                         'simfile_baseline_completeC25100_3_data.csv', 'simfile_baseline_completeC25100_4_data.csv'],
-    slice_name='infected',
-                        data_names=None,
-                        shifter_key='first_above_thrs',
-                        shifter_kwargs={'thrs':50},
-                        group_indeces=[[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24]],
-                        agg_func=np.mean)
+                         'simfile_baseline_complete_4_data.csv', 'simfile_baseline_completeQ_0_data.csv',
+                         'simfile_baseline_completeQ_1_data.csv', 'simfile_baseline_completeQ_2_data.csv',
+                         'simfile_baseline_completeQ_3_data.csv', 'simfile_baseline_completeQ_4_data.csv'],
+                         slice_name='infected',
+                         data_names=None,
+                         shifter_key='first_above_thrs',
+                         shifter_kwargs={'thrs':50},
+                         group_indeces=[[0,1,2,3,4],[5,6,7,8,9]],
+                         agg_func=np.mean)
 
     #state_analysis_main(['ddww_0_0_data.csv', 'ddww_0_1_data.csv', 'ddww_0_2_data.csv',
     #                     'ddww_0_5_data.csv', 'ddww_0_6_data.csv', 'ddww_0_7_data.csv', 'ddww_0_8_data.csv', 'ddww_0_9_data.csv',
@@ -177,8 +249,24 @@ if __name__ == '__main__':
                               'simfile_baseline_complete_2_traj.csv','simfile_baseline_complete_3_traj.csv',
                               'simfile_baseline_complete_4_traj.csv','simfile_baseline_completeC50200_0_traj.csv',
                               'simfile_baseline_completeC50200_1_traj.csv','simfile_baseline_completeC50200_2_traj.csv',
-                              'simfile_baseline_completeC50200_3_traj.csv','simfile_baseline_completeC50200_4_traj.csv'],
-                             group_indeces=[[0,1,2,3,4],[5,6,7,8,9]])
+                              'simfile_baseline_completeC50200_3_traj.csv','simfile_baseline_completeC50200_4_traj.csv',
+                              'simfile_baseline_completeC50100_0_traj.csv','simfile_baseline_completeC50100_1_traj.csv',
+                              'simfile_baseline_completeC50100_2_traj.csv','simfile_baseline_completeC50100_3_traj.csv',
+                              'simfile_baseline_completeC50100_4_traj.csv','simfile_baseline_completeC25200_0_traj.csv',
+                              'simfile_baseline_completeC25200_1_traj.csv','simfile_baseline_completeC25200_2_traj.csv',
+                              'simfile_baseline_completeC25200_3_traj.csv','simfile_baseline_completeC25200_4_traj.csv',
+                              'simfile_baseline_completeC25100_0_traj.csv','simfile_baseline_completeC25100_1_traj.csv',
+                              'simfile_baseline_completeC25100_2_traj.csv','simfile_baseline_completeC25100_3_traj.csv',
+                              'simfile_baseline_completeC25100_4_traj.csv'],
+                             group_indeces=[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14],
+                                            [15, 16, 17, 18, 19], [20, 21, 22, 23, 24]],
+                             nth_infected=200)
+#    trajectory_analysis_main(['simfile_baseline_complete_0_traj.csv','simfile_baseline_complete_1_traj.csv',
+#                              'simfile_baseline_complete_2_traj.csv','simfile_baseline_complete_3_traj.csv',
+#                              'simfile_baseline_complete_4_traj.csv','simfile_baseline_completeQ_0_traj.csv',
+#                              'simfile_baseline_completeQ_1_traj.csv','simfile_baseline_completeQ_2_traj.csv',
+#                              'simfile_baseline_completeQ_3_traj.csv','simfile_baseline_completeQ_4_traj.csv'],
+#                               group_indeces=[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]])
 
     #inp = ['baseline_complete_q_00_data.csv', 'sim_out_4_1_data.csv']
     #root = 'impimmun_complete_q_0'
