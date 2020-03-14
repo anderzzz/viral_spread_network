@@ -305,7 +305,7 @@ class Disease():
 
         transmission_made = False
         if not receiver.is_immune():
-            caution = min(transmitter.caution_interaction,
+            caution = max(transmitter.caution_interaction,
                           receiver.caution_interaction)
             thrs_transmission = self.transmission_base_prob * (1.0 - caution)
             transmission_made = self._trial(receiver.infect, None, lambda _: thrs_transmission)
@@ -426,6 +426,7 @@ class Disease():
         if not transmit_trajectory_file is None:
             self.transmit_trajectory = True
             self.transmit_trajectory_file = transmit_trajectory_file
+            open(self.transmit_trajectory_file, 'w').close()
         else:
             self.transmit_trajectory = False
 
