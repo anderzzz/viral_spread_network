@@ -1,9 +1,12 @@
 '''Analysis of simulation data and creation of graphical output
 
+By Anders Ohrn, March 2020.
+No guarantee of being bug free
+
 '''
 import pandas as pd
 import numpy as np
-from bokeh.models import ColumnDataSource, Legend, LinearAxis, SingleIntervalTicker
+from bokeh.models import ColumnDataSource, SingleIntervalTicker, Range1d
 from bokeh.plotting import figure, show
 from bokeh.layouts import column
 from bokeh.palettes import brewer
@@ -18,7 +21,18 @@ def _bool_to_int(row):
     row['0'] = ret_int
     return row
 
-def property_count_progression(growth_file, property_label):
+def select_caution(df, val_selector):
+    '''Select only individuals who has a particular caution level
+
+    '''
+    series_caution = df.loc[df['property'] == 'caution_interaction']['0'].astype(float)
+    indexer = series_caution.apply(val_selector)
+    names_true = df.loc[df['property'] == 'caution_interaction'][indexer]['name']
+    df_filtered = df.loc[df['name'].isin(names_true)]
+
+    return df_filtered
+
+def property_count_progression(growth_file, property_label, filter_caution_selector=None):
     '''Construct property count progression data
 
     '''
@@ -30,7 +44,12 @@ def property_count_progression(growth_file, property_label):
 
     df = pd.read_csv(growth_file)
 
-    df_state = df.loc[df['property'].isin(['contagious','infected','dead','immune','quarantined','revealed'])]
+    if not filter_caution_selector is None:
+        df_filtered = select_caution(df, filter_caution_selector)
+    else:
+        df_filtered = df
+
+    df_state = df_filtered.loc[df_filtered['property'].isin(['contagious','infected','dead','immune','quarantined','revealed'])]
     gg = df_state.groupby(['time_coordinate','property'])['0'].agg([_true_counter, _false_counter])
     df_state_agg = gg.rename(columns={'_true_counter' : 'N_people_Yes', '_false_counter' : 'N_people_No'}).reset_index()
     df_property_progression = df_state_agg.loc[df_state_agg['property'] == property_label]
@@ -89,29 +108,35 @@ def state_analysis_main(state_files, slice_name='infected', data_names=None,
         colors = [colors[k] for k in [0,1,3]]
     elif len(source_to_plot) == 2:
         colors = [colors[k] for k in [0,3]]
+    if '#f7f7f7' in colors:
+        c_tmp = list(colors)
+        c_tmp[colors.index('#f7f7f7')] = '#999999'
+        colors = tuple(c_tmp)
 
-    p = figure(plot_width=650, plot_height=500, toolbar_location='above')
+    p = figure(plot_width=750, plot_height=500, toolbar_location='above')
     for k, source in enumerate(source_to_plot):
 
         p.line(x='time_coordinate', y='N_people_Yes', source=source, line_width=3,
-               color=colors[k], line_dash='solid')
+               color=colors[k], line_dash='dotted', legend_label=data_names[k])
 
-    sims_renders = [(x, [g]) for (x, g) in zip(data_names, p.renderers)]
-    legend = Legend(items=sims_renders,
-                    location="bottom_left")
-    p.add_layout(legend, "below")
-    p.yaxis.axis_label = 'Number of {}'.format(slice_name)
+    p.legend.location = "top_right"
+    p.yaxis.axis_label = '# individuals who are {}'.format(slice_name)
     if not shifter_key is None:
-        p.xaxis.axis_label = 'Days since N > {}'.format(shifter_kwargs['thrs'])
+        p.xaxis.axis_label = 'TUs since # > {}'.format(shifter_kwargs['thrs'])
     else:
-        p.xaxis.axis_label = 'Days since start'
+        p.xaxis.axis_label = 'TUs since start'
+    p.x_range = Range1d(0, 121)
 
-    #show(p)
+    show(p)
 
-def trajectory_analysis_main(traj_files, group_indeces=None, nth_infected=200):
+def trajectory_analysis_main(traj_files, group_indeces=None, nth_infected=200,
+                             data_names=None):
     '''Main analysis function for the trajectory data
 
     '''
+    if data_names is None:
+        data_names = traj_files
+
     dfs_transmit_events = []
     dfs_transmit_lags = []
     for k, file in enumerate(traj_files):
@@ -168,29 +193,34 @@ def trajectory_analysis_main(traj_files, group_indeces=None, nth_infected=200):
         colors = [colors[k] for k in [0,1,3]]
     elif len(source1_to_plot) == 2:
         colors = [colors[k] for k in [0,3]]
+    if '#f7f7f7' in colors:
+        c_tmp = list(colors)
+        c_tmp[colors.index('#f7f7f7')] = '#999999'
+        colors = tuple(c_tmp)
 
-    p1 = figure(plot_width=650, plot_height=500, toolbar_location='above')
+    p1 = figure(plot_width=750, plot_height=500, toolbar_location='above')
     for k, source in enumerate(source1_to_plot):
 
         p1.circle(x='receiver', y='empirical frequency', source=source, line_width=3,
-                color=colors[k], line_dash='solid', size=10)
+                color=colors[k], line_dash='solid', size=10, legend_label=data_names[k])
         p1.line(x='receiver', y='empirical frequency', source=source, line_width=1,
                  color=colors[k], line_dash='dotted')
 
-    p1.xaxis.axis_label = 'Number of transmissions to other persons'
+    p1.xaxis.axis_label = '# of transmissions to other individuals before recovery'
     p1.yaxis.axis_label = 'Normalized Frequency'
     p1.xaxis.ticker = SingleIntervalTicker(interval=1)
     p1.xaxis.minor_tick_line_color = None
+    p1.legend.location = "top_right"
 
     p2 = figure(plot_width=650, plot_height=500, toolbar_location='above')
     for k, source in enumerate(source2_to_plot):
 
         p2.circle(x='time since transmitter infected', y='empirical frequency', source=source, line_width=3,
-               color=colors[k], line_dash='solid', size=10)
+               color=colors[k], line_dash='solid', size=10, legend_label=data_names[k])
         p2.line(x='time since transmitter infected', y='empirical frequency', source=source, line_width=1,
                   color=colors[k], line_dash='dotted')
 
-    p2.xaxis.axis_label = 'Days after transmitter was infected'
+    p2.xaxis.axis_label = 'TUs after infection in which transmitter infects other individual'
     p2.yaxis.axis_label = 'Normalized Frequency'
     p2.xaxis.ticker = SingleIntervalTicker(interval=1)
     p2.xaxis.minor_tick_line_color = None
@@ -199,85 +229,25 @@ def trajectory_analysis_main(traj_files, group_indeces=None, nth_infected=200):
 
 if __name__ == '__main__':
 
-    #cc_1 = [0,1]
-    #cc_2 = [0,1,2]
-    #inp = []
-    #for c_1 in cc_1:
-    #    for c_2 in cc_2:
-    #        name = 'sim_out_{}_{}_data.csv'.format(c_1, c_2)
-    #        inp.append(name)
-    #growth_analysis_main(inp, 'infected')
-
-#    state_analysis_main(['simfile_baseline_complete_0_data.csv', 'simfile_baseline_complete_1_data.csv',
-#                         'simfile_baseline_complete_2_data.csv', 'simfile_baseline_complete_3_data.csv',
-#                         'simfile_baseline_complete_4_data.csv', 'simfile_baseline_completeC50200_0_data.csv',
-#                         'simfile_baseline_completeC50200_1_data.csv', 'simfile_baseline_completeC50200_2_data.csv',
-#                         'simfile_baseline_completeC50200_3_data.csv', 'simfile_baseline_completeC50200_4_data.csv',
-#                         'simfile_baseline_completeC50100_0_data.csv', 'simfile_baseline_completeC50100_1_data.csv',
-#                         'simfile_baseline_completeC50100_2_data.csv', 'simfile_baseline_completeC50100_3_data.csv',
-#                         'simfile_baseline_completeC50100_4_data.csv', 'simfile_baseline_completeC25200_0_data.csv',
-#                         'simfile_baseline_completeC25200_1_data.csv', 'simfile_baseline_completeC25200_2_data.csv',
-#                         'simfile_baseline_completeC25200_3_data.csv', 'simfile_baseline_completeC25200_4_data.csv',
-#                         'simfile_baseline_completeC25100_0_data.csv',
-#                         'simfile_baseline_completeC25100_1_data.csv', 'simfile_baseline_completeC25100_2_data.csv',
-#                         'simfile_baseline_completeC25100_3_data.csv', 'simfile_baseline_completeC25100_4_data.csv'],
-#    slice_name='infected',
-#                        data_names=None,
-#                        shifter_key='first_above_thrs',
-#                        shifter_kwargs={'thrs':50},
-#                        group_indeces=[[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24]],
-#                        agg_func=np.mean)
-
-    state_analysis_main(['simfile_baseline_complete_0_data.csv', 'simfile_baseline_complete_1_data.csv',
-                         'simfile_baseline_complete_2_data.csv', 'simfile_baseline_complete_3_data.csv',
-                         'simfile_baseline_complete_4_data.csv', 'simfile_baseline_completeQ_0_data.csv',
-                         'simfile_baseline_completeQ_1_data.csv', 'simfile_baseline_completeQ_2_data.csv',
-                         'simfile_baseline_completeQ_3_data.csv', 'simfile_baseline_completeQ_4_data.csv'],
+    state_analysis_main(['simfile_baseline_completeQ_0_data.csv', 'simfile_baseline_completeQ_1_data.csv',
+                         'simfile_baseline_completeQ_2_data.csv', 'simfile_baseline_completeQ_3_data.csv',
+                         'simfile_baseline_completeQ_4_data.csv',
+                         'simfile_early_completeQ_0_data.csv',
+                         'simfile_early_completeQ_1_data.csv', 'simfile_early_completeQ_2_data.csv',
+                         'simfile_early_completeQ_3_data.csv', 'simfile_early_completeQ_4_data.csv'],
+                         data_names=['baseline complete', 'early reveal complete'],
                          slice_name='infected',
-                         data_names=None,
                          shifter_key='first_above_thrs',
-                         shifter_kwargs={'thrs':50},
-                         group_indeces=[[0,1,2,3,4],[5,6,7,8,9]],
+                         shifter_kwargs={'thrs':30},
+                         group_indeces=[[0,1,2,3,4], [5,6,7,8,9]],
                          agg_func=np.mean)
 
-    #state_analysis_main(['ddww_0_0_data.csv', 'ddww_0_1_data.csv', 'ddww_0_2_data.csv',
-    #                     'ddww_0_5_data.csv', 'ddww_0_6_data.csv', 'ddww_0_7_data.csv', 'ddww_0_8_data.csv', 'ddww_0_9_data.csv',
-    #                     'ddww_0_10_data.csv', 'ddww_0_11_data.csv', 'ddww_0_3_data.csv'],
-    #                     'infected', None, 'first_above_thrs', shifter_kwargs={'thrs':50})
-
-    trajectory_analysis_main(['simfile_baseline_complete_0_traj.csv','simfile_baseline_complete_1_traj.csv',
-                              'simfile_baseline_complete_2_traj.csv','simfile_baseline_complete_3_traj.csv',
-                              'simfile_baseline_complete_4_traj.csv','simfile_baseline_completeC50200_0_traj.csv',
-                              'simfile_baseline_completeC50200_1_traj.csv','simfile_baseline_completeC50200_2_traj.csv',
-                              'simfile_baseline_completeC50200_3_traj.csv','simfile_baseline_completeC50200_4_traj.csv',
-                              'simfile_baseline_completeC50100_0_traj.csv','simfile_baseline_completeC50100_1_traj.csv',
-                              'simfile_baseline_completeC50100_2_traj.csv','simfile_baseline_completeC50100_3_traj.csv',
-                              'simfile_baseline_completeC50100_4_traj.csv','simfile_baseline_completeC25200_0_traj.csv',
-                              'simfile_baseline_completeC25200_1_traj.csv','simfile_baseline_completeC25200_2_traj.csv',
-                              'simfile_baseline_completeC25200_3_traj.csv','simfile_baseline_completeC25200_4_traj.csv',
-                              'simfile_baseline_completeC25100_0_traj.csv','simfile_baseline_completeC25100_1_traj.csv',
-                              'simfile_baseline_completeC25100_2_traj.csv','simfile_baseline_completeC25100_3_traj.csv',
-                              'simfile_baseline_completeC25100_4_traj.csv'],
-                             group_indeces=[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14],
-                                            [15, 16, 17, 18, 19], [20, 21, 22, 23, 24]],
-                             nth_infected=200)
-#    trajectory_analysis_main(['simfile_baseline_complete_0_traj.csv','simfile_baseline_complete_1_traj.csv',
-#                              'simfile_baseline_complete_2_traj.csv','simfile_baseline_complete_3_traj.csv',
-#                              'simfile_baseline_complete_4_traj.csv','simfile_baseline_completeQ_0_traj.csv',
-#                              'simfile_baseline_completeQ_1_traj.csv','simfile_baseline_completeQ_2_traj.csv',
-#                              'simfile_baseline_completeQ_3_traj.csv','simfile_baseline_completeQ_4_traj.csv'],
-#                               group_indeces=[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]])
-
-    #inp = ['baseline_complete_q_00_data.csv', 'sim_out_4_1_data.csv']
-    #root = 'impimmun_complete_q_0'
-    #for kk in range(2, 3):
-    #    inp.append('{}{}_data.csv'.format(root, kk))
-    #growth_analysis_main(inp, 'infected', None, 'first_above_thrs', shifter_kwargs={'thrs':50})
-
-    #inp = ['baseline_complete_00_data.csv', 'baseline_complete_q_00_data.csv', 'hightransmit_complete_q_00_data.csv',
-    #       'hightransmit_complete_00_data.csv']
-    #growth_analysis_main(inp, 'infected',
-    #                     ['complete graph', 'complete graph w. reactive quarantine policy',
-    #                      'complete graph w. double transmitter rate & reactive quarantine policy',
-    #                      'complete graph w. double transmitter rate'],
-    #                     'first_above_thrs', {'thrs':50})
+    trajectory_analysis_main(['simfile_baseline_completeQ_0_traj.csv', 'simfile_baseline_completeQ_1_traj.csv',
+                         'simfile_baseline_completeQ_2_traj.csv', 'simfile_baseline_completeQ_3_traj.csv',
+                         'simfile_baseline_completeQ_4_traj.csv',
+                         'simfile_early_completeQ_0_traj.csv',
+                         'simfile_early_completeQ_1_traj.csv', 'simfile_early_completeQ_2_traj.csv',
+                         'simfile_early_completeQ_3_traj.csv', 'simfile_early_completeQ_4_traj.csv'],
+                             group_indeces=[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]],
+                             data_names=['Baseline', 'Early Reveal'],
+                             nth_infected=150)

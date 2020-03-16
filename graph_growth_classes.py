@@ -1,5 +1,8 @@
 '''Classes for persons in a social graph in the world in which a disease is spreading
 
+By Anders Ohrn, March 2020.
+No guarantee of being bug free
+
 '''
 import pandas as pd
 from numpy import random as rnd
